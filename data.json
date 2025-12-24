@@ -59,7 +59,7 @@
     "epochs": [
       { 
         "id": "01", "label": "INIT", "loss": "0.854", "acc": "0.201", 
-        "degree": "Bio-Maths Foundations", "year": "2016 - 2019", 
+        "degree": "Bio-Maths Foundations", "year": "2017 - 2019", 
         "desc": "Initializing weights. Merging organic systems (Biology) with Logic (Maths)." 
       },
       { 
@@ -169,5 +169,22 @@
       "email": "funding@venture_capital.com",
       "message": "def make_offer(): return \"Let's build the future.\""
     }
+  },
+  "footer": {
+    "title": "REFERENCES & CITATIONS",
+    "abstract": "ABSTRACT: Naveen V is a Multi-Modal Engineer bridging the gap between theoretical AI architectures and scalable production systems. Specializing in Large Language Models, Generative Pipelines, and System Design.",
+    "references": [
+      { "id": "[1]", "label": "Initialization (Home)", "url": "#hero-section" },
+      { "id": "[2]", "label": "Neural_Architecture (Projects)", "url": "#neural-projects" },
+      { "id": "[3]", "label": "Training_Logs (Experience)", "url": "#training-dashboard" },
+      { "id": "[4]", "label": "Model_Card (About)", "url": "#model-card-section" }
+    ],
+    "connect": [
+      { "id": "[5]", "label": "GitHub Repositories", "url": "https://github.com/" },
+      { "id": "[6]", "label": "LinkedIn Profile", "url": "https://linkedin.com/" },
+      { "id": "[7]", "label": "Email Correspondence", "url": "mailto:naveen@agents.ai" }
+    ],
+    "bibtex": "@misc{naveen2025portfolio,\n  author = {Naveen V},\n  title = {Architecting Intelligence: A Portfolio},\n  year = {2025},\n  publisher = {Agents Factory},\n  note = {Accessed via Web}\n}",
+    "meta": "Last updated: 2025-10-24 | v1.0.4-stable"
   }
 }

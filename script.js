@@ -54,6 +54,7 @@ async function loadData() {
         initTrainingSection();
         initNeuralSection();
         initContactSection();
+        initFooter();
     } catch (error) {
         console.error("Error loading data:", error);
     }
@@ -1318,4 +1319,46 @@ function resetContactAnimation() {
         btn.style.background = '#4ade80';
         btn.innerHTML = '<span class="play-icon">▶</span> RUN SCRIPT';
     }
+}
+
+/* =========================================
+   FOOTER LOGIC (RESEARCH PAPER)
+   ========================================= */
+function initFooter() {
+    if(!state.data || !state.data.footer) return;
+    const d = state.data.footer;
+
+    // 1. Static Text
+    document.getElementById('f-title').innerText = d.title;
+    document.getElementById('f-abstract').innerText = d.abstract;
+    document.getElementById('f-meta').innerText = d.meta;
+    document.getElementById('f-bibtex').innerText = d.bibtex;
+
+    // 2. References List (Internal)
+    const refContainer = document.getElementById('f-references');
+    refContainer.innerHTML = '';
+    d.references.forEach(ref => {
+        const li = document.createElement('li');
+        li.className = 'ref-item';
+        li.innerHTML = `<span class="ref-id">${ref.id}</span> <a href="${ref.url}" class="ref-link">${ref.label}</a>`;
+        refContainer.appendChild(li);
+    });
+
+    // 3. Connect List (External)
+    const connContainer = document.getElementById('f-connect');
+    connContainer.innerHTML = '';
+    d.connect.forEach(conn => {
+        const li = document.createElement('li');
+        li.className = 'ref-item';
+        li.innerHTML = `<span class="ref-id">${conn.id}</span> <a href="${conn.url}" target="_blank" class="ref-link">${conn.label}</a>`;
+        connContainer.appendChild(li);
+    });
+
+    // 4. Copy Interaction
+    const btn = document.getElementById('copy-bib-btn');
+    btn.addEventListener('click', () => {
+        navigator.clipboard.writeText(d.bibtex);
+        btn.innerText = "COPIED";
+        setTimeout(() => btn.innerText = "COPY", 2000);
+    });
 }
