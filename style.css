@@ -371,8 +371,9 @@ h1 {
     gap: 30px;
     width: 100%;
     max-width: 1300px;
-    height: 85vh;
+    height: auto; /* Changed from 85vh */
     min-height: 600px;
+    align-items: stretch; /* Ensures both columns are equal height */
 }
 
 /* --- PANELS --- */
@@ -385,6 +386,7 @@ h1 {
     flex-direction: column;
     backdrop-filter: blur(12px);
     transition: border-color 0.3s, transform 0.3s;
+    height: 100%; /* Forces equal height visual */
 }
 
 .card-panel:hover {
@@ -419,14 +421,12 @@ h1 {
 .code-content {
     padding: 20px;
     flex: 1;
-    overflow-y: auto;
+    overflow: visible; /* No Scroll */
     display: flex;
     gap: 15px;
     font-size: clamp(12px, 1.5vw, 14px);
     line-height: 1.6;
     color: #a3a3a3;
-    scrollbar-width: thin;
-    scrollbar-color: #333 transparent;
 }
 
 /* Syntax Highlighting */
@@ -442,7 +442,7 @@ h1 {
 .visual-content {
     padding: clamp(25px, 4vw, 40px);
     flex: 1;
-    overflow-y: auto;
+    overflow: visible; /* No Scroll */
 }
 
 .profile-header {
@@ -603,7 +603,7 @@ h1 {
 /* Mobile */
 @media (max-width: 968px) {
     .model-container { grid-template-columns: 1fr; height: auto; }
-    .code-view { height: 350px; order: 2; }
+    .code-view { height: auto; order: 2; } /* Changed from fixed height */
     .visual-view { order: 1; height: auto; }
     .visual-content { padding: 20px; }
 }
@@ -634,13 +634,13 @@ h1 {
 
 /* --- Left Panel (Terminal) --- */
 .terminal-window {
-    background: #0c0c0c; /* Specific dark terminal bg */
+    background: #0c0c0c;
     border: 1px solid #333;
     border-radius: 8px;
     box-shadow: 0 10px 30px rgba(0,0,0,0.5);
     overflow: hidden;
     height: 100%;
-    max-height: 80vh;
+    /* max-height removed */
     display: flex; flex-direction: column;
 }
 
@@ -653,7 +653,13 @@ h1 {
 .close { background: #ff5f56; } .minimize { background: #ffbd2e; } .maximize { background: #27c93f; }
 .term-title { color: #888; font-size: 12px; margin: auto; font-family: var(--font-mono); }
 
-.terminal-content { padding: 25px; color: #d4d4d4; overflow-y: auto; flex-grow: 1; font-family: var(--font-mono); }
+.terminal-content { 
+    padding: 25px; 
+    color: #d4d4d4; 
+    overflow: visible; /* Changed from overflow-y: auto */
+    flex-grow: 1; 
+    font-family: var(--font-mono); 
+}
 .command-line { margin-bottom: 25px; font-size: 14px; }
 .user-prompt { color: var(--accent); margin-right: 10px; }
 
@@ -696,16 +702,18 @@ h1 {
 
 /* --- Right Panel (Graph) --- */
 .graph-wrapper {
-    width: 100%; height: 100%;
+    width: 100%;
+    height: 100%;
     background: #080808; 
     border: 1px solid #333;
     border-radius: 8px; 
     padding: 25px;
-    display: flex; flex-direction: column;
+    display: flex; 
+    flex-direction: column;
     box-shadow: inset 0 0 80px rgba(0,0,0,0.8);
     position: relative;
     overflow: hidden;
-    min-height: 500px; /* Ensure visible on small screens */
+    min-height: 400px; /* Ensure it has height on mobile */
 }
 
 /* Subtle grid background */
@@ -727,15 +735,20 @@ h1 {
     flex-grow: 1; 
     position: relative; 
     width: 100%; 
-    height: 100%; 
-    min-height: 300px;
+    height: 100%; /* Force it to fill remaining space */
+    min-height: 250px;
     overflow: hidden; 
     cursor: crosshair; 
     z-index: 1;
 }
 
 /* SVG Styles */
-svg { width: 100%; height: 100%; overflow: visible; display: block; }
+svg { 
+    width: 100%; 
+    height: 100%; 
+    overflow: visible; 
+    display: block; 
+}
 .grid-line { stroke: #222; stroke-width: 1; }
 .axis-label { fill: #999; font-size: 11px; text-anchor: middle; font-family: var(--font-mono); font-weight: bold; }
 
@@ -819,16 +832,51 @@ svg { width: 100%; height: 100%; overflow: visible; display: block; }
 .tt-header { font-weight: bold; border-bottom: 1px solid #333; padding-bottom: 8px; margin-bottom: 8px; color: var(--accent); font-size: 12px; letter-spacing: 1px; }
 
 .hyperparameters {
-    margin-top: auto; display: flex; justify-content: space-between;
-    border-top: 1px solid #333; padding-top: 15px; z-index: 2;
+    margin-top: auto;
+    display: flex;
+    justify-content: space-between; /* Pushes items to extreme ends */
+    align-items: flex-end; /* Aligns them to bottom if heights differ */
+    border-top: 1px solid #333;
+    padding-top: 15px;
+    z-index: 2;
+    width: 100%; /* Ensure it takes full available width */
 }
-.param { display: flex; flex-direction: column; gap: 5px; }
-.lbl { color: #555; font-size: 9px; font-weight: bold; letter-spacing: 1px; font-family: var(--font-mono); }
+.param {
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+}
+
+/* Force the First Item (Optimizer) to align Left */
+.param:first-child {
+    align-items: flex-start;
+    text-align: left;
+}
+
+/* Force the Last Item (Current State) to align Right */
+.param:last-child {
+    align-items: flex-end; /* Pushes content to the right edge of the flex container */
+    text-align: right;     /* Ensures text is right-aligned */
+}
+
+.lbl {
+    color: #555;
+    font-size: 9px;
+    font-weight: bold;
+    letter-spacing: 1px;
+    font-family: var(--font-mono);
+    text-transform: uppercase;
+}
 
 @media (max-width: 900px) {
     #training-dashboard { grid-template-columns: 1fr; padding: 15px; gap: 40px; height: auto; }
-    .graph-wrapper { height: 400px; }
     .terminal-window { max-height: none; }
+    #neural-projects .graph-wrapper {
+        height: auto !important; 
+        min-height: auto;
+        padding-bottom: 60px; /* Add breathing room for the bottom card */
+    }
+
 }
 
 /* --- SECTION 4: NEURAL ARCHITECTURE --- */
@@ -1067,17 +1115,45 @@ svg { width: 100%; height: 100%; overflow: visible; display: block; }
 
 @media (max-width: 768px) {
     :root { --neuron-size: 70px; }
-    #neural-projects { padding: 40px 15px; }
+    /*#neural-projects { padding: 40px 15px; }*/
     .graph-wrapper { min-height: auto; flex-direction: column; }
     .cols-container { flex-direction: column; gap: 60px; padding: 0; align-items: stretch; }
-    .layer-col { gap: 25px; flex-direction: row; flex-wrap: wrap; justify-content: center; }
+    /*.layer-col { gap: 25px; flex-direction: row; flex-wrap: wrap; justify-content: center; }*/
     .col-header { width: 100%; margin-bottom: 15px; font-size: 9px; }
     .tech-node { font-size: 9px; padding: 10px; }
     .project-col { flex-direction: column; align-items: center; gap: 25px; }
-    .agent-card { width: 100%; max-width: 400px; }
-    #project-connections { opacity: 0.8; }
+    /*.agent-card { width: 100%; max-width: 400px; }*/
+    /*#project-connections { opacity: 0.8; }*/
     .arch-line { stroke-width: 1px; opacity: 0.2; }
     .arch-line.active-line { opacity: 1; stroke-width: 3px; filter: drop-shadow(0 0 4px var(--accent)); }
+    #neural-projects .cols-container {
+        flex-direction: column;
+        gap: 50px;
+        align-items: center; /* Center the nodes */
+        width: 100%;
+    }
+
+    /* 3. Ensure columns take full width */
+    #neural-projects .layer-col {
+        width: 100%;
+        flex-direction: row; /* Keep nodes in a row (horizontal) inside the layer */
+        flex-wrap: wrap;
+        gap: 20px;
+    }
+
+    /* 4. Reset the Agent Card positioning */
+    #neural-projects .agent-card {
+        width: 100%;
+        max-width: 350px; /* Prevent it from being too wide */
+        margin: 0 auto;
+        position: relative; /* Ensure it stays in flow */
+        transform: none !important; /* Remove any desktop hover transforms that might stick */
+    }
+    
+    /* 5. Adjust the SVG lines opacity since they might look messy in vertical stack */
+    #project-connections {
+        opacity: 0.3;
+    }
 }
 
 @media (max-width: 480px) {

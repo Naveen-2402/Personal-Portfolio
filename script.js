@@ -29,7 +29,8 @@ const state = {
         hasRendered: false,
         observer: null,
         zones: [],
-        dataPoints: [] // Store graph curve points
+        baseData: [], // NEW: Stores the normalized curve shape
+        dataPoints: [] 
     },
     neural: {
         isFirstClick: true,
@@ -681,20 +682,24 @@ function startLiveTimer() {
 
 
 /* =========================================
-   SECTION 3: TRAINING DASHBOARD LOGIC
+   SECTION 3: TRAINING DASHBOARD LOGIC (UPDATED)
    ========================================= */
 
+// Logical dimensions for the graph (Scales via CSS automatically)
+const GRAPH_LOGIC_WIDTH = 800;
+const GRAPH_LOGIC_HEIGHT = 400;
+const GRAPH_PADDING_BOTTOM = 40;
+
 function initTrainingSection() {
-    if(!state.data.education) return;
+    if(!state.data || !state.data.education) return;
     
     // 1. Build Terminal Rows
     const container = document.getElementById('terminal-rows');
     container.innerHTML = '';
     state.data.education.epochs.forEach(epoch => {
         const row = document.createElement('div');
-        row.className = 'epoch-row'; // Starts invisible
+        row.className = 'epoch-row'; 
         
-        // Conditional description
         let descHTML = `<p class="description">${epoch.desc}</p>`;
         if(epoch.active) {
             descHTML = `<p class="description"><span class="status-blink">>> FINE_TUNING...</span> ${epoch.desc.replace('>> FINE_TUNING... ', '')}</p>`;
@@ -715,57 +720,63 @@ function initTrainingSection() {
         container.appendChild(row);
     });
 
-    // 2. Setup Graph Data
+    // 2. Prepare Graph Data
+    // We generate the shape ONCE so the "noise" doesn't jitter on resize
     state.training.zones = state.data.education.graph_zones;
-    
-    // Initial Render call to setup SVG structure (but wait for visibility to animate)
+    generateBaseData(); 
+
+    // 3. Initial Render
     renderTrainingGraph();
-    window.addEventListener('resize', renderTrainingGraph);
+    
+    // NOTE: Resize listener removed to prevent graph disappearing.
+    // The SVG viewBox handles scaling automatically.
 }
 
-// --- GRAPH GENERATION MATH ---
-function generateGraphPoints(width, height) {
+// --- MATH & DATA GENERATION ---
+function generateBaseData() {
+    state.training.baseData = [];
     const zones = state.training.zones;
-    let points = [];
     const totalZones = zones.length;
-    const zoneWidth = width / totalZones;
-    const stepsPerZone = 12;
+    const zoneWidth = GRAPH_LOGIC_WIDTH / totalZones;
+    const stepsPerZone = 12; // Resolution of curve
 
     zones.forEach((zone, zIndex) => {
         for (let i = 0; i < stepsPerZone; i++) {
+            // X Position
+            const zoneStartX = zIndex * zoneWidth;
             const relativeX = (i / stepsPerZone) * zoneWidth;
-            const x = (zIndex * zoneWidth) + relativeX;
+            const x = zoneStartX + relativeX;
+
+            // Y Calculation
             const progress = i / stepsPerZone;
             
-            // Descent Math (Linear + curve)
+            // Base descent curve
             let baseLoss = zone.startLoss - ((zone.startLoss - zone.endLoss) * Math.pow(progress, 0.8));
             
-            // "Zig Zag" Volatility
+            // Volatility (Sine wave + Noise)
             const frequency = 2.5; 
             const sineWave = Math.sin(progress * Math.PI * frequency) * zone.volatility;
             const microNoise = (Math.random() - 0.5) * (zone.volatility * 0.2);
 
             let finalLoss = Math.max(0.01, Math.min(0.99, baseLoss + sineWave + microNoise));
-            
-            points.push({
+
+            state.training.baseData.push({
                 x: x,
-                y: (1 - finalLoss) * height, // Invert for SVG
+                y: (1 - finalLoss) * GRAPH_LOGIC_HEIGHT, // Invert for SVG Y-axis
                 loss: finalLoss,
                 zone: zone
             });
         }
     });
     
-    // Add final point
+    // Add final point to close the gap
     const lastZone = zones[zones.length-1];
-    points.push({
-        x: width,
-        y: (1 - lastZone.endLoss) * height,
+    state.training.baseData.push({
+        x: GRAPH_LOGIC_WIDTH, 
+        y: (1 - lastZone.endLoss) * GRAPH_LOGIC_HEIGHT, 
         loss: lastZone.endLoss,
         zone: lastZone
     });
-    
-    return points;
 }
 
 function renderTrainingGraph() {
@@ -773,12 +784,9 @@ function renderTrainingGraph() {
     const svgLayer = document.getElementById('svg-layer');
     if(!container || !svgLayer) return;
 
-    const rect = container.getBoundingClientRect();
-    const width = rect.width || 800; 
-    const height = rect.height || 400;
-
-    state.training.dataPoints = generateGraphPoints(width, height);
-    const data = state.training.dataPoints;
+    const data = state.training.baseData;
+    const zones = state.training.zones;
+    const internalHeight = GRAPH_LOGIC_HEIGHT + GRAPH_PADDING_BOTTOM;
 
     // SVG Defs (Gradient)
     const defs = `
@@ -789,33 +797,40 @@ function renderTrainingGraph() {
         </linearGradient>
     </defs>`;
 
-    // Build Path
+    // Build SVG String with viewBox for scaling
+    let svgHTML = `<svg viewBox="0 0 ${GRAPH_LOGIC_WIDTH} ${internalHeight}" preserveAspectRatio="none" style="width:100%; height:100%; display:block;">${defs}`;
+    
+    // Render Grid Lines & Labels
+    const zoneWidth = GRAPH_LOGIC_WIDTH / zones.length;
+    zones.forEach((zone, index) => {
+        const xPos = index * zoneWidth;
+        // Grid Line
+        svgHTML += `<line x1="${xPos}" y1="0" x2="${xPos}" y2="${GRAPH_LOGIC_HEIGHT}" class="grid-line" opacity="0.1" />`;
+        // Label
+        svgHTML += `<text x="${xPos + (zoneWidth/2)}" y="${GRAPH_LOGIC_HEIGHT + 25}" class="axis-label" fill="#666" font-size="12" text-anchor="middle" font-family="monospace" font-weight="bold">${zone.label}</text>`;
+    });
+
+    // Generate Smooth Path (Bezier)
     let pathD = `M ${data[0].x},${data[0].y} `;
     for(let i = 1; i < data.length; i++) {
         const cp1x = data[i-1].x + (data[i].x - data[i-1].x) / 2;
         pathD += `C ${cp1x},${data[i-1].y} ${cp1x},${data[i].y} ${data[i].x},${data[i].y} `;
     }
-    const areaD = pathD + `L ${width},${height} L 0,${height} Z`;
 
-    // Construct SVG
-    svgLayer.innerHTML = `
-    <svg viewBox="0 0 ${width} ${height}" preserveAspectRatio="none">
-        ${defs}
-        ${state.training.zones.map((z, i) => {
-            const x = i * (width/state.training.zones.length);
-            return `<line x1="${x}" y1="0" x2="${x}" y2="${height}" class="grid-line" opacity="0.1" />
-                    <text x="${x + 20}" y="${height - 10}" class="axis-label">${z.label}</text>`;
-        }).join('')}
-        
-        <path d="${areaD}" class="area-fill" id="graph-area"/>
-        <path d="${pathD}" class="graph-line" id="graph-stroke"/>
-    </svg>`;
+    const areaD = pathD + `L ${GRAPH_LOGIC_WIDTH},${GRAPH_LOGIC_HEIGHT} L 0,${GRAPH_LOGIC_HEIGHT} Z`;
 
-    setupGraphInteraction(container, width, height);
+    // Append Paths (Area + Line)
+    svgHTML += `<path d="${areaD}" class="area-fill" id="graph-area" fill="url(#gradientFill)" opacity="0" />`;
+    svgHTML += `<path d="${pathD}" class="graph-line" id="graph-stroke" fill="none" stroke="#fbbf24" stroke-width="2.5" stroke-dasharray="2000" stroke-dashoffset="2000" />`;
+    svgHTML += `</svg>`;
+
+    svgLayer.innerHTML = svgHTML;
+
+    // Setup Interaction Logic
+    setupGraphInteraction(container, data);
 }
 
-function setupGraphInteraction(container, width, height) {
-    // Re-bind listeners for Tooltip
+function setupGraphInteraction(container, data) {
     const tooltip = document.getElementById('tooltip');
     const cursorLine = document.getElementById('cursor-line');
     const cursorDot = document.getElementById('cursor-dot');
@@ -823,37 +838,49 @@ function setupGraphInteraction(container, width, height) {
     const ttGained = document.getElementById('tt-gained');
     const ttLost = document.getElementById('tt-lost');
 
+    // Remove old listeners to prevent stacking
+    container.onmousemove = null;
+    container.onmouseleave = null;
+
     container.onmousemove = (e) => {
         if(hoverHint) hoverHint.classList.add('hidden');
-        
+
         const rect = container.getBoundingClientRect();
         const relX = e.clientX - rect.left;
-        
+
+        // 1. Move Cursor Line (Visual only)
         cursorLine.style.display = 'block';
         cursorLine.style.left = `${relX}px`;
 
-        // Find closest point
-        const data = state.training.dataPoints;
+        // 2. Map pixel X to Logical SVG X (0-800)
+        const svgX = (relX / rect.width) * GRAPH_LOGIC_WIDTH;
+
+        // 3. Find closest data point
         const closest = data.reduce((prev, curr) => 
-            Math.abs(curr.x - relX) < Math.abs(prev.x - relX) ? curr : prev
+            Math.abs(curr.x - svgX) < Math.abs(prev.x - svgX) ? curr : prev
         );
 
         if (closest) {
+            // 4. Map Logical Y back to Pixel Y for the Dot
+            // Note: Use (GRAPH_LOGIC_HEIGHT + PADDING) as divisor to match SVG aspect ratio
+            const internalHeight = GRAPH_LOGIC_HEIGHT + GRAPH_PADDING_BOTTOM;
+            const pixelY = (closest.y / internalHeight) * rect.height;
+
             cursorDot.style.display = 'block';
             cursorDot.style.left = `${relX}px`;
-            cursorDot.style.top = `${closest.y}px`;
+            cursorDot.style.top = `${pixelY}px`;
 
-            // Tooltip Content
+            // 5. Update Tooltip Data
             tooltip.querySelector('.tt-header').innerHTML = `${closest.zone.label} <span style="float:right; opacity:0.5">LOSS: ${closest.loss.toFixed(3)}</span>`;
             ttGained.innerText = closest.zone.gained;
             ttLost.innerText = closest.zone.lost;
 
-            // Positioning
+            // 6. Tooltip Positioning (Smart flip)
             let ttX = relX + 20;
-            if (ttX + 240 > width) ttX = relX - 250;
+            if (ttX + 240 > rect.width) ttX = relX - 250;
             
             tooltip.style.left = `${ttX}px`;
-            tooltip.style.top = `${closest.y - 50}px`;
+            tooltip.style.top = `${pixelY - 50}px`;
             tooltip.style.opacity = 1;
         }
     };
@@ -865,7 +892,7 @@ function setupGraphInteraction(container, width, height) {
     };
 }
 
-// --- ANIMATION CONTROLLERS (RE-TRIGGER LOGIC) ---
+// --- ANIMATION CONTROLLERS ---
 
 function startTrainingAnimation() {
     // 1. Terminal Rows
@@ -875,14 +902,13 @@ function startTrainingAnimation() {
             row.classList.add('active');
             const fill = row.querySelector('.progress-fill');
             if(fill) fill.style.width = '100%';
-        }, i * 200); // Staggered delay
+        }, i * 200);
     });
 
-    // 2. Graph Drawing
+    // 2. Graph Drawing (CSS Animation Trigger)
     const stroke = document.getElementById('graph-stroke');
     const area = document.getElementById('graph-area');
     if(stroke && area) {
-        // Reset animation by removing/adding classes
         stroke.classList.remove('animate');
         area.classList.remove('animate');
         void stroke.offsetWidth; // Trigger Reflow
