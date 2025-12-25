@@ -169,113 +169,118 @@ document.addEventListener('DOMContentLoaded', () => {
 
 function initNavbar() {
     const d = state.data.about.profile;
-    
-    // 1. TERMINAL LOOPING LOGIC (Left Side)
+
+    // --- 1. TERMINAL LOOPING LOGIC (Left Side) ---
     const logoEl = document.getElementById('nav-logo');
     const navCursor = document.querySelector('.nav-cursor');
-    
-    // Hide default cursor
-    if(navCursor) navCursor.style.display = 'none';
+    if (navCursor) navCursor.style.display = 'none';
 
-    // --- CONFIGURATION ---
     const isMobile = window.innerWidth < 768;
     const promptUser = isMobile ? "" : "root";
     const promptHost = isMobile ? "" : "naveen";
     const promptSym = isMobile ? "~# " : ":~# ";
-    
-    // --- YOUR SELECTED MESSAGES ---
+
     const commands = [
         "./start_engine --mode=founder",
-        "./loading_weights [██████] 100%",
-        "./deploy_agents --scale=global"
+        "loading_weights [██████] 100%",
+        "deploy_agents --scale=global"
     ];
-    
-    // Build the Static Prompt HTML (Colors)
+
     let promptHTML = "";
     if (!isMobile) {
-        promptHTML += `<span style="color:var(--accent)">${promptUser}</span>`; // root
+        promptHTML += `<span style="color:var(--accent)">${promptUser}</span>`;
         promptHTML += `<span style="color:#fff">@</span>`;
-        promptHTML += `<span style="color:#4ade80">${promptHost}</span>`; // naveen
-        promptHTML += `<span style="color:#fff">${promptSym}</span>`; // :~#
+        promptHTML += `<span style="color:#4ade80">${promptHost}</span>`;
+        promptHTML += `<span style="color:#fff">${promptSym}</span>`;
     } else {
-        promptHTML += `<span style="color:#fff">${promptSym}</span>`; // ~#
+        promptHTML += `<span style="color:#fff">${promptSym}</span>`;
     }
 
-    // State Variables for Looping
-    let msgIndex = 0;       
-    let charIndex = 0;      
-    let isDeleting = false; 
+    let msgIndex = 0;
+    let charIndex = 0;
+    let isDeleting = false;
 
     function typeLoop() {
         const currentCommand = commands[msgIndex];
         const visibleText = currentCommand.substring(0, charIndex);
-        
-        // Render: Static Prompt + Dynamic Command
+
         logoEl.innerHTML = `${promptHTML}<span style="color:#e5e5e5">${visibleText}</span>`;
 
-        // Determine Speed
-        let typeSpeed = 80; // Standard typing speed
-
+        let typeSpeed = 80;
         if (isDeleting) {
-            typeSpeed = 40; // Deleting is faster
+            typeSpeed = 40;
             charIndex--;
         } else {
             charIndex++;
         }
 
-        // Logic Cycles
         if (!isDeleting && charIndex === currentCommand.length + 1) {
-            // Finished Typing -> Pause -> Start Deleting
             isDeleting = true;
-            typeSpeed = 2500; // Longer pause to read the message (2.5s)
+            typeSpeed = 2500;
         } else if (isDeleting && charIndex === 0) {
-            // Finished Deleting -> Switch Message -> Pause -> Start Typing
             isDeleting = false;
-            msgIndex = (msgIndex + 1) % commands.length; // Loop 0 -> 1 -> 2 -> 0
-            typeSpeed = 500; // Pause before new message
+            msgIndex = (msgIndex + 1) % commands.length;
+            typeSpeed = 500;
         }
 
         setTimeout(typeLoop, typeSpeed);
     }
 
-    // Start the loop after a small delay
     setTimeout(typeLoop, 1000);
 
-    // 2. Generate Links (Right Side)
-    const navList = document.getElementById('nav-links');
-    navList.innerHTML = ''; 
+    // --- 2. GENERATE LINKS (Desktop Only) ---
+    const desktopList = document.getElementById('nav-links');
+    if (desktopList) desktopList.innerHTML = '';
 
     state.nav.links.forEach(link => {
-        const li = document.createElement('li');
-        li.className = 'nav-item';
-        // Prefix with ./ to look like executables
-        li.innerHTML = `<a href="#${link.id}" class="nav-link" data-target="${link.id}">./${link.label}</a>`;
-        navList.appendChild(li);
-    });
+        const linkHTML = `<a href="#${link.id}" class="nav-link" data-target="${link.id}">./${link.label}</a>`;
 
-    // 3. Click Handlers
-    navList.addEventListener('click', (e) => {
-        if(e.target.classList.contains('nav-link')) {
-            e.preventDefault();
-            const targetId = e.target.getAttribute('data-target');
-            document.getElementById(targetId).scrollIntoView({ behavior: 'smooth' });
+        if (desktopList) {
+            const li = document.createElement('li');
+            li.className = 'nav-item';
+            li.innerHTML = linkHTML;
+            desktopList.appendChild(li);
         }
     });
 
-    // 4. Scroll Logic
+    // --- 3. SCROLL LOGIC (Nav Hide & Indicator Hide) ---
+    const scrollHint = document.getElementById('scroll-hint');
+
     window.addEventListener('scroll', () => {
         const nav = document.getElementById('main-nav');
         const currentScrollY = window.scrollY;
-        
-        // Hide on scroll down, Show on scroll up
+
+        // A. Toggle Navbar Visibility
         if (currentScrollY > state.nav.lastScrollY && currentScrollY > 100) {
             nav.classList.add('nav-hidden');
         } else {
             nav.classList.remove('nav-hidden');
         }
         state.nav.lastScrollY = currentScrollY;
+
+        // B. Toggle Scroll Indicator
+        if (scrollHint) {
+            if (currentScrollY > 100) {
+                scrollHint.classList.add('hidden');
+            } else {
+                scrollHint.classList.remove('hidden');
+            }
+        }
     });
+
+    // --- 4. DESKTOP SMOOTH SCROLL ---
+    if (desktopList) {
+        desktopList.addEventListener('click', (e) => {
+            if (e.target.classList.contains('nav-link')) {
+                e.preventDefault();
+                const targetId = e.target.getAttribute('data-target');
+                document.getElementById(targetId)
+                    .scrollIntoView({ behavior: 'smooth' });
+            }
+        });
+    }
 }
+
 
 /* =========================================
    SECTION 1: HERO LOGIC (MODIFIED FOR SEPARATE LOADER)

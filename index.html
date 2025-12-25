@@ -9,81 +9,99 @@
 </head>
 <body>
 
-    <section id="loading-screen">
-        <canvas id="noise-canvas"></canvas>
-        
-            <div class="loader-ui">
-                <div class="generation-prompt" id="prompt">
-                    <div class="prompt-text">
-                        > INITIALIZING_SYSTEM_CORE<span class="blink">_</span>
-                    </div>
-                </div>
+<!-- ================= LOADING SCREEN ================= -->
+<section id="loading-screen">
+    <canvas id="noise-canvas"></canvas>
+    <div class="loader-ui">
+        <div class="generation-prompt" id="prompt">
+            <div class="prompt-text">
+                > INITIALIZING_SYSTEM_CORE<span class="blink">_</span>
+            </div>
+        </div>
 
-                <div class="stats-ui" id="stats">
-                    <div class="stat-row">
-                        <span>SAMPLER: <span style="color:var(--accent)" id="stat-sampler"></span></span>
-                        <span>STEPS: <span id="step-count">0</span>/<span id="stat-steps">50</span></span>
-                        <span>ROI: <span id="stat-roi"></span></span>
-                    </div>
-                    <div>> diffusing noise into product<span class="blink">_</span></div>
-                    <div class="progress-container">
-                        <div class="progress-bar" id="progress"></div>
-                    </div>
-                </div>
-                
-                <div class="data-readout visible" id="loader-readout" style="opacity: 1;">
-                    <span>LATENT_COORDS: <span id="coords">CALCULATING...</span></span>
+        <div class="stats-ui" id="stats">
+            <div class="stat-row">
+                <span>SAMPLER: <span style="color:var(--accent)" id="stat-sampler"></span></span>
+                <span>STEPS: <span id="step-count">0</span>/<span id="stat-steps">50</span></span>
+                <span>ROI: <span id="stat-roi"></span></span>
+            </div>
+            <div>> diffusing noise into product<span class="blink">_</span></div>
+            <div class="progress-container">
+                <div class="progress-bar" id="progress"></div>
+            </div>
+        </div>
+
+        <div class="data-readout visible" id="loader-readout">
+            <span>LATENT_COORDS: <span id="coords">CALCULATING...</span></span>
+        </div>
+    </div>
+</section>
+
+<div id="main-website">
+
+<!-- ================= NAVBAR ================= -->
+<nav id="main-nav" class="navbar">
+    <div class="nav-left">
+        <span class="nav-cursor">></span>
+        <span id="nav-logo" class="nav-logo-text"></span><span class="blink">_</span>
+    </div>
+
+    <!-- Hamburger Button -->
+    <!-- <button class="hamburger-btn" aria-label="Toggle Menu"> -->
+    <!--     <span class="bar"></span> -->
+    <!--     <span class="bar"></span> -->
+    <!--     <span class="bar"></span> -->
+    <!-- </button> -->
+
+    <!-- Desktop Menu -->
+    <div class="nav-right desktop-only">
+        <ul id="nav-links" class="nav-menu"></ul>
+    </div>
+
+    <!-- Mobile Menu -->
+    <!-- <div class="mobile-menu-overlay"> -->
+    <!--     <ul id="mobile-nav-links" class="mobile-nav-list"></ul> -->
+    <!-- </div> -->
+
+</nav>
+
+<!-- ================= SCROLL INDICATOR ================= -->
+<div class="scroll-indicator visible" id="scroll-hint">
+    <span class="scroll-text">SCROLL_TO_INIT</span>
+    <div class="scroll-arrow">
+        <span></span>
+        <span></span>
+        <span></span>
+    </div>
+</div>
+
+<!-- ================= HERO ================= -->
+<section id="hero-section">
+    <canvas id="content-canvas"></canvas>
+
+    <div class="ui-layer">
+        <div class="content-container animate-wrapper visible" id="content">
+            <div class="text-section">
+                <div class="text-content">
+                    <div class="label reveal-text delay-1" id="hero-role"></div>
+                    <div class="accent-line"></div>
+                    <h1 class="reveal-text delay-2">
+                        <span id="hero-prefix"></span><br>
+                        <span class="gradient-text" id="hero-gradient" data-text=""></span>
+                    </h1>
+                    <p class="subtitle reveal-text delay-3" id="hero-subtitle"></p>
+                    <div class="tech-stack reveal-text delay-4" id="hero-stack"></div>
                 </div>
             </div>
-        </section>
+            <div class="image-section"></div>
+        </div>
 
-        <div id="main-website">
-
-            <nav id="main-nav" class="navbar">
-            <div class="nav-left">
-                <span class="nav-cursor">></span>
-                <span id="nav-logo" class="nav-logo-text"></span><span class="blink">_</span>
-            </div>
-            <div class="nav-right">
-                <ul id="nav-links" class="nav-menu"></ul>
-            </div>
-        </nav>
-
-        <section id="hero-section">
-            <canvas id="content-canvas"></canvas>
-
-            <div class="ui-layer">
-                <div class="content-container animate-wrapper visible" id="content" style="opacity: 1;">
-                    <div class="text-section">
-                        <div class="text-content">
-                            <div class="label reveal-text delay-1" id="hero-role"></div>
-                            <div class="accent-line"></div>
-                            <h1 class="reveal-text delay-2">
-                                <span id="hero-prefix"></span><br>
-                                <span class="gradient-text" id="hero-gradient" data-text=""></span>
-                            </h1>
-                            <p class="subtitle reveal-text delay-3" id="hero-subtitle"></p>
-                            <div class="tech-stack reveal-text delay-4" id="hero-stack"></div>
-                        </div>
-                    </div>
-                    <div class="image-section"></div>
-                </div>
-                
-                <div class="data-readout visible" id="readout">
-                    <span>SYSTEM: <span id="entropy">ONLINE</span></span>
-                    <span>INFERENCE: <span id="inference">0.00s</span></span>
-                </div>
-
-                <div class="scroll-indicator" id="scroll-hint">
-                    <span class="scroll-text">SCROLL_TO_INIT</span>
-                    <div class="scroll-arrow">
-                        <span></span>
-                        <span></span>
-                        <span></span>
-                    </div>
-                </div>
-            </div>
-        </section>
+        <div class="data-readout visible" id="readout">
+            <span>SYSTEM: <span id="entropy">ONLINE</span></span>
+            <span>INFERENCE: <span id="inference">0.00s</span></span>
+        </div>
+    </div>
+</section>
 
         <section id="model-card-section">
             <div class="model-container">
