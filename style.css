@@ -18,6 +18,56 @@ body {
     color: var(--text);
 }
 
+
+
+/* --- 0. NEW LOADING LAYOUT STRUCTURE --- */
+
+#loading-screen {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: var(--bg);
+    z-index: 9999; /* Always on top */
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    transition: opacity 1s ease-out; /* Fade out effect */
+}
+
+#loading-screen.fade-out {
+    opacity: 0;
+    pointer-events: none;
+}
+
+#main-website {
+    opacity: 0;
+    transition: opacity 1.5s ease-in; /* Fade in effect */
+    height: 100vh;
+    overflow-y: hidden; /* Prevent scrolling while loading */
+}
+
+#main-website.visible {
+    opacity: 1;
+    height: auto;
+    overflow-y: visible;
+}
+
+/* Fix for noise canvas in loading screen */
+#loading-screen #noise-canvas {
+    position: absolute;
+    top: 0; left: 0; width: 100%; height: 100%;
+    z-index: 1;
+}
+
+.loader-ui {
+    position: relative;
+    z-index: 10;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+}
 /* --- SECTION 1: HERO CONTAINER --- */
 #hero-section {
     position: relative;
@@ -1513,4 +1563,18 @@ code { font-family: 'Consolas', monospace; color: #d4d4d4; }
 @media (max-width: 768px) {
     .paper-grid { grid-template-columns: 1fr; gap: 40px; }
     #research-footer { padding: 40px 20px; }
+}
+
+
+/* --- FORM ERROR STYLING --- */
+.input-error {
+    border-color: #ff5f56 !important; /* Specific Red for Error */
+    box-shadow: 0 0 10px rgba(255, 95, 86, 0.5) !important;
+    animation: error-shake 0.3s ease-in-out;
+}
+
+@keyframes error-shake {
+    0%, 100% { transform: translateX(0); }
+    25% { transform: translateX(-5px); }
+    75% { transform: translateX(5px); }
 }

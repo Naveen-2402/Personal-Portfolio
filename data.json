@@ -158,11 +158,12 @@
   "contact": {
     "filename": "contact_me.py",
     "email": "naveen@agents.ai",
+    "email_org": "founder@agentsfactory.io", 
     "phone": "+91 98765 43210",
     "location": "Chennai, IN [13.08° N]",
     "socials": [
-      { "label": "origin/github", "link": "https://github.com/yourhandle", "icon": "" },
-      { "label": "origin/linkedin", "link": "https://linkedin.com/in/yourhandle", "icon": "" }
+      { "label": "origin/github", "link": "https://github.com/", "icon": "" },
+      { "label": "origin/linkedin", "link": "https://linkedin.com/", "icon": "" }
     ],
     "placeholders": {
       "name": "Future_CoFounder",

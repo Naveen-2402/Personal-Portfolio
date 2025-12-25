@@ -9,18 +9,13 @@
 </head>
 <body>
 
-    
-    <section id="hero-section">
+    <section id="loading-screen">
         <canvas id="noise-canvas"></canvas>
-        <canvas id="content-canvas"></canvas>
-
-        <div class="ui-layer">
+        
+        <div class="loader-ui">
             <div class="generation-prompt" id="prompt">
                 <div class="prompt-text">
-                    > INITIALIZING_DIFFUSION_INTERFACE<span class="blink">_</span>
-                </div>
-                <div class="interaction-hint">
-                    MOVE MOUSE OR SCROLL TO GENERATE
+                    > INITIALIZING_SYSTEM_CORE<span class="blink">_</span>
                 </div>
             </div>
 
@@ -35,246 +30,215 @@
                     <div class="progress-bar" id="progress"></div>
                 </div>
             </div>
-
-            <div class="content-container animate-wrapper" id="content">
-                <div class="text-section">
-                    <div class="text-content">
-                        <div class="label reveal-text delay-1" id="hero-role"></div>
-                        <div class="accent-line"></div>
-                        <h1 class="reveal-text delay-2">
-                            <span id="hero-prefix"></span><br>
-                            <span class="gradient-text" id="hero-gradient" data-text=""></span>
-                        </h1>
-                        <p class="subtitle reveal-text delay-3" id="hero-subtitle"></p>
-                        <div class="tech-stack reveal-text delay-4" id="hero-stack">
-                            </div>
-                    </div>
-                </div>
-                <div class="image-section"></div>
-            </div>
-
-            <div class="data-readout" id="readout">
-                <span>LATENT_COORDS: <span id="coords">x:0 y:0</span></span>
-                <span>ENTROPY: <span id="entropy">OPTIMIZED</span></span>
-                <span>INFERENCE: <span id="inference">0.00s</span></span>
-            </div>
-        </div>
-    </section>
-
-    <section id="model-card-section">
-        <div class="model-container">
             
-            <div class="card-panel code-view">
-                <div class="panel-header">
-                    <span class="file-name">naveen_config.json</span>
-                    <span class="status-dot"></span>
-                </div>
-                <div class="code-content">
-                    <div class="line-numbers" id="line-numbers"></div>
-                    <pre><code id="json-stream"></code><span class="cursor" id="cursor"></span></pre>
-                </div>
-            </div>
-
-            <div class="card-panel visual-view">
-                <div class="panel-header">
-                    <span class="file-name">MODEL_CARD.md</span>
-                </div>
-                
-                <div class="visual-content">
-                    <div class="info-block" id="block-profile">
-                        <div class="profile-header">
-                            <h1 class="glitch-name" id="model-name"></h1>
-                            <div id="model-badges">
-                                </div>
-                        </div>
-                        <p class="role-title" id="model-title"></p>
-                        <p class="desc" id="model-desc"></p>
-                    </div>
-
-                    <div class="info-block" id="block-heatmap">
-                        <h3>ATTENTION MAP (CORE COMPETENCIES)</h3>
-                        <p class="micro-label">HOVER TO INSPECT WEIGHTS</p>
-                        
-                        <div class="heatmap-container">
-                            <div class="heatmap-grid" id="attention-map">
-                                </div>
-                            <div class="skill-readout" id="skill-readout">
-                                <span class="prompt-blink">[ WAITING FOR INPUT ]</span>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div class="info-block" id="block-pipeline">
-                        <h3>TRAINING_PIPELINE & DATASETS</h3>
-                        <ul class="data-list">
-                            <li>
-                                <span class="key-term">PRE_TRAINING:</span> 
-                                <span>Computer Science (Master's) with Mathematical Foundations</span>
-                            </li>
-                            <li>
-                                <span class="key-term">RLHF (Human Feedback):</span> 
-                                <span>Business and Management</span>
-                            </li>
-                            <li>
-                                <span class="key-term">FINE_TUNING:</span> 
-                                <span>Building Generative AI SaaS in Public</span>
-                            </li>
-                        </ul>
-                    </div>
-                </div>
+            <div class="data-readout visible" id="loader-readout" style="opacity: 1;">
+                 <span>LATENT_COORDS: <span id="coords">CALCULATING...</span></span>
             </div>
         </div>
     </section>
 
-    <section id="training-dashboard">
-        <div class="panel left-panel">
-            <div class="terminal-window">
-                <div class="terminal-header">
-                    <div class="buttons">
-                        <span class="btn-dot close"></span>
-                        <span class="btn-dot minimize"></span>
-                        <span class="btn-dot maximize"></span>
-                    </div>
-                    <div class="term-title">training_log.py — Naveen@CEG:~/education</div>
-                </div>
-                
-                <div class="terminal-content">
-                    <div class="command-line">
-                        <span class="user-prompt">naveen@system:~$</span> python train_model.py --optimize=business_value
-                    </div>
-                    
-                    <div class="training-container" id="terminal-rows"></div>
-                </div>
-            </div>
-        </div>
-
-        <div class="panel right-panel">
-            <div class="graph-wrapper">
-                <div class="graph-header">
-                    <div class="graph-title">OPTIMIZATION_COST</div>
-                    <div class="graph-subtitle">Visualizing Knowledge Gained vs. Personal Sacrifices</div>
-                </div>
-                
-                <div class="chart-container" id="lossChartContainer">
-                    <div id="hover-hint" class="interaction-popup">
-                        <div class="pulse-ring"></div>
-                        <span>[ HOVER_TO_INSPECT_DATA ]</span>
-                    </div>
-
-                    <div id="tooltip" class="chart-tooltip">
-                        <div class="tt-header">EPOCH X</div>
-                        <div class="tt-body">
-                            <div><span class="tt-label theme-color">[GAINED]:</span> <span id="tt-gained"></span></div>
-                            <div style="margin-top: 8px;"><span class="tt-label loss-color">[LOST]:</span> <span id="tt-lost"></span></div>
-                        </div>
-                    </div>
-                    
-                    <div id="cursor-line" class="cursor-line"></div>
-                    <div id="cursor-dot" class="cursor-dot"></div>
-                    
-                    <div id="svg-layer" style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; z-index: 1;"></div>
-                </div>
-
-                <div class="hyperparameters">
-                    <div class="param">
-                        <span class="lbl">OPTIMIZER</span>
-                        <span class="val">ADAM_W (Weighted Decoupling)</span>
-                    </div>
-                    <div class="param">
-                        <span class="lbl">CURRENT STATE</span>
-                        <span class="val theme-color blink-text">FOUNDER_MODE_ACTIVATED</span>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </section>
-
-    <section id="neural-projects">
-        <div class="neural-container">
-            
-            <div class="section-header" id="neural-header">
-                <h2 class="section-title">SYSTEMS_IN_ACTION <span class="blink">_</span></h2>
-                <p class="section-subtitle">CLICK ANY AGENT TO TRACE ITS NEURAL PATHWAY</p>
-            </div>
-
-            <div class="graph-wrapper" id="graph-wrapper">
-                <svg id="project-connections"></svg>
-
-                <div class="cols-container" id="neural-cols">
-                    </div>
-            </div>
-        </div>
-    </section>
-
-
-    <section id="terminal-contact">
-        <div class="ide-container" id="ide-container">
-            
-            <div class="ide-sidebar">
+    <div id="main-website">
         
-                <div class="sidebar-section">
-                    <div class="sidebar-header">PROJECT_EXPLORER</div>
-                    <div class="file-tree">
-                        <div class="folder open"><span class="icon">▼</span> <span>src</span></div>
-                        <div class="file active" style="padding-left: 35px;">
-                            <span class="icon py">🐍</span> <span id="file-name-display">contact.py</span>
+        <section id="hero-section">
+            <canvas id="content-canvas"></canvas>
+
+            <div class="ui-layer">
+                <div class="content-container animate-wrapper visible" id="content" style="opacity: 1;">
+                    <div class="text-section">
+                        <div class="text-content">
+                            <div class="label reveal-text delay-1" id="hero-role"></div>
+                            <div class="accent-line"></div>
+                            <h1 class="reveal-text delay-2">
+                                <span id="hero-prefix"></span><br>
+                                <span class="gradient-text" id="hero-gradient" data-text=""></span>
+                            </h1>
+                            <p class="subtitle reveal-text delay-3" id="hero-subtitle"></p>
+                            <div class="tech-stack reveal-text delay-4" id="hero-stack"></div>
                         </div>
                     </div>
+                    <div class="image-section"></div>
                 </div>
-
-                <div class="sidebar-section">
-                    <div class="sidebar-header">NETWORK_INTERFACES</div>
-                    <div id="network-interfaces">
-                        </div>
+                
+                <div class="data-readout visible" id="readout">
+                    <span>SYSTEM: <span id="entropy">ONLINE</span></span>
+                    <span>INFERENCE: <span id="inference">0.00s</span></span>
                 </div>
-
-                <div class="sidebar-section">
-                    <div class="sidebar-header">GIT_REMOTES</div>
-                    <div id="git-remotes">
-                        </div>
-                </div>
-
             </div>
+        </section>
 
-            <div class="ide-main">
-                <div class="tab-bar">
-                    <div class="tab active">
-                        <span class="icon py">🐍</span> <span id="tab-name-display">contact.py</span> 
-                        <span class="close-x">×</span>
+        <section id="model-card-section">
+            <div class="model-container">
+                <div class="card-panel code-view">
+                    <div class="panel-header">
+                        <span class="file-name">naveen_config.json</span>
+                        <span class="status-dot"></span>
+                    </div>
+                    <div class="code-content">
+                        <div class="line-numbers" id="line-numbers"></div>
+                        <pre><code id="json-stream"></code><span class="cursor" id="cursor"></span></pre>
                     </div>
                 </div>
-
-                <div class="editor-split">
-                    
-                    <div class="gui-panel">
-                        <div class="gui-header">ENVIRONMENT_VARIABLES</div>
-                        <form id="ide-form">
-                            <div class="var-row">
-                                <label>SENDER_NAME</label>
-                                <input type="text" id="in-name" autocomplete="off">
-                            </div>
-                            <div class="var-row">
-                                <label>CONTACT_EMAIL</label>
-                                <input type="email" id="in-email" autocomplete="off">
-                            </div>
-                            <div class="var-row">
-                                <label>INTENT_MODE</label>
-                                <select id="in-intent">
-                                    <option value="COLLABORATION">COLLABORATION</option>
-                                    <option value="HIRING_OPPORTUNITY">HIRING_OPPORTUNITY</option>
-                                    <option value="GENERAL_QUERY">GENERAL_QUERY</option>
-                                </select>
-                            </div>
-                            <div class="var-row">
-                                <label>MESSAGE_PAYLOAD</label>
-                                <textarea id="in-message" rows="5"></textarea>
-                            </div>
-                        </form>
+                <div class="card-panel visual-view">
+                    <div class="panel-header">
+                        <span class="file-name">MODEL_CARD.md</span>
                     </div>
+                    <div class="visual-content">
+                        <div class="info-block" id="block-profile">
+                            <div class="profile-header">
+                                <h1 class="glitch-name" id="model-name"></h1>
+                                <div id="model-badges"></div>
+                            </div>
+                            <p class="role-title" id="model-title"></p>
+                            <p class="desc" id="model-desc"></p>
+                        </div>
+                        <div class="info-block" id="block-heatmap">
+                            <h3>ATTENTION MAP (CORE COMPETENCIES)</h3>
+                            <p class="micro-label">HOVER TO INSPECT WEIGHTS</p>
+                            <div class="heatmap-container">
+                                <div class="heatmap-grid" id="attention-map"></div>
+                                <div class="skill-readout" id="skill-readout">
+                                    <span class="prompt-blink">[ WAITING FOR INPUT ]</span>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="info-block" id="block-pipeline">
+                            <h3>TRAINING_PIPELINE & DATASETS</h3>
+                            <ul class="data-list">
+                                <li><span class="key-term">PRE_TRAINING:</span> <span>Computer Science (Master's) with Mathematical Foundations</span></li>
+                                <li><span class="key-term">RLHF (Human Feedback):</span> <span>Business and Management</span></li>
+                                <li><span class="key-term">FINE_TUNING:</span> <span>Building Generative AI SaaS in Public</span></li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
 
-                    <div class="code-panel">
-                        <div class="line-numbers">1<br>2<br>3<br>4<br>5<br>6<br>7<br>8<br>9<br>10<br>11<br>12<br>13<br>14<br>15</div>
-                        <pre><code class="language-python">
+        <section id="training-dashboard">
+            <div class="panel left-panel">
+                <div class="terminal-window">
+                    <div class="terminal-header">
+                        <div class="buttons">
+                            <span class="btn-dot close"></span>
+                            <span class="btn-dot minimize"></span>
+                            <span class="btn-dot maximize"></span>
+                        </div>
+                        <div class="term-title">training_log.py — Naveen@CEG:~/education</div>
+                    </div>
+                    <div class="terminal-content">
+                        <div class="command-line">
+                            <span class="user-prompt">naveen@system:~$</span> python train_model.py --optimize=business_value
+                        </div>
+                        <div class="training-container" id="terminal-rows"></div>
+                    </div>
+                </div>
+            </div>
+            <div class="panel right-panel">
+                <div class="graph-wrapper">
+                    <div class="graph-header">
+                        <div class="graph-title">OPTIMIZATION_COST</div>
+                        <div class="graph-subtitle">Visualizing Knowledge Gained vs. Personal Sacrifices</div>
+                    </div>
+                    <div class="chart-container" id="lossChartContainer">
+                        <div id="hover-hint" class="interaction-popup">
+                            <div class="pulse-ring"></div>
+                            <span>[ HOVER_TO_INSPECT_DATA ]</span>
+                        </div>
+                        <div id="tooltip" class="chart-tooltip">
+                            <div class="tt-header">EPOCH X</div>
+                            <div class="tt-body">
+                                <div><span class="tt-label theme-color">[GAINED]:</span> <span id="tt-gained"></span></div>
+                                <div style="margin-top: 8px;"><span class="tt-label loss-color">[LOST]:</span> <span id="tt-lost"></span></div>
+                            </div>
+                        </div>
+                        <div id="cursor-line" class="cursor-line"></div>
+                        <div id="cursor-dot" class="cursor-dot"></div>
+                        <div id="svg-layer" style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; z-index: 1;"></div>
+                    </div>
+                    <div class="hyperparameters">
+                        <div class="param">
+                            <span class="lbl">OPTIMIZER</span>
+                            <span class="val">ADAM_W (Weighted Decoupling)</span>
+                        </div>
+                        <div class="param">
+                            <span class="lbl">CURRENT STATE</span>
+                            <span class="val theme-color blink-text">FOUNDER_MODE_ACTIVATED</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section id="neural-projects">
+            <div class="neural-container">
+                <div class="section-header" id="neural-header">
+                    <h2 class="section-title">SYSTEMS_IN_ACTION <span class="blink">_</span></h2>
+                    <p class="section-subtitle">CLICK ANY AGENT TO TRACE ITS NEURAL PATHWAY</p>
+                </div>
+                <div class="graph-wrapper" id="graph-wrapper">
+                    <svg id="project-connections"></svg>
+                    <div class="cols-container" id="neural-cols"></div>
+                </div>
+            </div>
+        </section>
+
+        <section id="terminal-contact">
+            <div class="ide-container" id="ide-container">
+                <div class="ide-sidebar">
+                    <div class="sidebar-section">
+                        <div class="sidebar-header">PROJECT_EXPLORER</div>
+                        <div class="file-tree">
+                            <div class="folder open"><span class="icon">▼</span> <span>src</span></div>
+                            <div class="file active" style="padding-left: 35px;">
+                                <span class="icon py">🐍</span> <span id="file-name-display">contact.py</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="sidebar-section">
+                        <div class="sidebar-header">NETWORK_INTERFACES</div>
+                        <div id="network-interfaces"></div>
+                    </div>
+                    <div class="sidebar-section">
+                        <div class="sidebar-header">GIT_REMOTES</div>
+                        <div id="git-remotes"></div>
+                    </div>
+                </div>
+                <div class="ide-main">
+                    <div class="tab-bar">
+                        <div class="tab active">
+                            <span class="icon py">🐍</span> <span id="tab-name-display">contact.py</span> 
+                            <span class="close-x">×</span>
+                        </div>
+                    </div>
+                    <div class="editor-split">
+                        <div class="gui-panel">
+                            <div class="gui-header">ENVIRONMENT_VARIABLES</div>
+                            <form id="ide-form">
+                                <div class="var-row">
+                                    <label>SENDER_NAME</label>
+                                    <input type="text" id="in-name" autocomplete="off">
+                                </div>
+                                <div class="var-row">
+                                    <label>CONTACT_EMAIL</label>
+                                    <input type="email" id="in-email" autocomplete="off">
+                                </div>
+                                <div class="var-row">
+                                    <label>INTENT_MODE</label>
+                                    <select id="in-intent">
+                                        <option value="COLLABORATION">COLLABORATION</option>
+                                        <option value="HIRING_OPPORTUNITY">HIRING_OPPORTUNITY</option>
+                                        <option value="GENERAL_QUERY">GENERAL_QUERY</option>
+                                    </select>
+                                </div>
+                                <div class="var-row">
+                                    <label>MESSAGE_PAYLOAD</label>
+                                    <textarea id="in-message" rows="5"></textarea>
+                                </div>
+                            </form>
+                        </div>
+                        <div class="code-panel">
+                            <div class="line-numbers">1<br>2<br>3<br>4<br>5<br>6<br>7<br>8<br>9<br>10<br>11<br>12<br>13<br>14<br>15</div>
+                            <pre><code class="language-python">
 <span class="comment"># Import Neural Networking Protocols</span>
 <span class="keyword">import</span> agent_factory <span class="keyword">as</span> af
 <span class="keyword">import</span> sys
@@ -297,71 +261,67 @@
 <span class="keyword">if</span> __name__ == <span class="string">"__main__"</span>:
     request = ConnectionRequest()
     request.send_payload()
-                        </code></pre>
+                            </code></pre>
+                        </div>
+                    </div>
+                    <div class="terminal-area">
+                        <div class="terminal-tabs">
+                            <span class="active">TERMINAL</span>
+                            <span>OUTPUT</span>
+                            <span>PROBLEMS</span>
+                        </div>
+                        <div class="terminal-window" id="terminal-output">
+                            <span class="path">user@naveen-portfolio:~/scripts$</span> <span class="cursor-blink">_</span>
+                        </div>
                     </div>
                 </div>
+                <button class="run-btn" id="run-script-btn">
+                    <span class="play-icon">▶</span> RUN SCRIPT
+                </button>
+            </div>
+        </section>
 
-                <div class="terminal-area">
-                    <div class="terminal-tabs">
-                        <span class="active">TERMINAL</span>
-                        <span>OUTPUT</span>
-                        <span>PROBLEMS</span>
+        <footer id="research-footer">
+            <div class="paper-container">
+                <div class="paper-header">
+                    <h2 id="f-title">REFERENCES</h2>
+                    <div class="paper-line"></div>
+                </div>
+                <div class="paper-section">
+                    <p id="f-abstract" class="abstract-text"></p>
+                </div>
+                <div class="paper-grid">
+                    <div class="col-refs">
+                        <h3 class="paper-subhead">1. INDEX TERMS</h3>
+                        <ul class="ref-list" id="f-references"></ul>
+                        <h3 class="paper-subhead" style="margin-top: 20px;">2. EXTERNAL LINKS</h3>
+                        <ul class="ref-list" id="f-connect"></ul>
                     </div>
-                    <div class="terminal-window" id="terminal-output">
-                        <span class="path">user@naveen-portfolio:~/scripts$</span> <span class="cursor-blink">_</span>
+                    <div class="col-cite">
+                        <h3 class="paper-subhead">3. CITATION (BibTeX)</h3>
+                        <div class="bibtex-box">
+                            <pre><code id="f-bibtex"></code></pre>
+                            <button class="copy-btn" id="copy-bib-btn">COPY</button>
+                        </div>
                     </div>
                 </div>
-            </div>
-
-            <button class="run-btn" id="run-script-btn">
-                <span class="play-icon">▶</span> RUN SCRIPT
-            </button>
-
-        </div>
-    </section>
-
-    <footer id="research-footer">
-    <div class="paper-container">
-        
-        <div class="paper-header">
-            <h2 id="f-title">REFERENCES</h2>
-            <div class="paper-line"></div>
-        </div>
-
-        <div class="paper-section">
-            <p id="f-abstract" class="abstract-text"></p>
-        </div>
-
-        <div class="paper-grid">
-            
-            <div class="col-refs">
-                <h3 class="paper-subhead">1. INDEX TERMS</h3>
-                <ul class="ref-list" id="f-references">
-                    </ul>
-                
-                <h3 class="paper-subhead" style="margin-top: 20px;">2. EXTERNAL LINKS</h3>
-                <ul class="ref-list" id="f-connect">
-                    </ul>
-            </div>
-
-            <div class="col-cite">
-                <h3 class="paper-subhead">3. CITATION (BibTeX)</h3>
-                <div class="bibtex-box">
-                    <pre><code id="f-bibtex"></code></pre>
-                    <button class="copy-btn" id="copy-bib-btn">COPY</button>
+                <div class="paper-meta">
+                    <span id="f-meta"></span>
+                    <span class="latex-logo">Generated with <span class="latex-style">L<span class="sup">a</span>T<span class="sub">e</span>X</span> Style Engine</span>
                 </div>
             </div>
-
-        </div>
-
-        <div class="paper-meta">
-            <span id="f-meta"></span>
-            <span class="latex-logo">Generated with <span class="latex-style">L<span class="sup">a</span>T<span class="sub">e</span>X</span> Style Engine</span>
-        </div>
-
-    </div>
-</footer>
-
+        </footer>
+    
+    </div> 
     <script src="script.js"></script>
+    <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js"></script>
+    <script type="text/javascript">
+    (function(){
+        // REPLACE 'YOUR_PUBLIC_KEY' WITH YOUR ACTUAL KEY FROM STEP 4
+        emailjs.init({
+            publicKey: "19I3Bwb-IScMYzXDQ",
+        });
+    })();
+    </script>
 </body>
 </html>

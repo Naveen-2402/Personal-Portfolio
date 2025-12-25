@@ -134,7 +134,7 @@ document.addEventListener('DOMContentLoaded', () => {
 });
 
 /* =========================================
-   SECTION 1: HERO LOGIC
+   SECTION 1: HERO LOGIC (MODIFIED FOR SEPARATE LOADER)
    ========================================= */
 
 function initHeroText() {
@@ -162,27 +162,38 @@ function initHeroText() {
 }
 
 function initHeroCanvas() {
-    const canvas = document.getElementById('noise-canvas');
-    const contentCanvas = document.getElementById('content-canvas');
+    // 1. Get Elements
+    const noiseCanvas = document.getElementById('noise-canvas'); // In Loading Screen
+    const contentCanvas = document.getElementById('content-canvas'); // In Hero Section
     const heroSection = document.getElementById('hero-section');
-    
-    if(!canvas || !contentCanvas) return;
+    const loadingScreen = document.getElementById('loading-screen');
 
-    state.hero.noiseCtx = canvas.getContext('2d');
+    if(!noiseCanvas || !contentCanvas) return;
+
+    // 2. Setup Contexts
+    state.hero.noiseCtx = noiseCanvas.getContext('2d');
     state.hero.contentCtx = contentCanvas.getContext('2d');
     
     // Image Loading
-    state.hero.img.src = 'images/1.jpeg';
+    state.hero.img.src = 'images/1_crp.png';
     state.hero.img.onload = () => createParticles();
     state.hero.img.onerror = () => createFallbackParticles();
 
-    // Resize Handler
+    // 3. Resize Handler (Handles both Loading Screen and Hero Section)
     function resize() {
-        state.hero.width = canvas.width = contentCanvas.width = heroSection.offsetWidth;
-        state.hero.height = canvas.height = contentCanvas.height = heroSection.offsetHeight;
+        // Noise Canvas = Window Size (Fullscreen Loader)
+        state.hero.width = window.innerWidth;
+        state.hero.height = window.innerHeight;
+        noiseCanvas.width = state.hero.width;
+        noiseCanvas.height = state.hero.height;
+
+        // Content Canvas = Hero Section Size
+        contentCanvas.width = heroSection.offsetWidth;
+        contentCanvas.height = heroSection.offsetHeight;
+
         state.hero.isMobile = state.hero.width <= 968;
         
-        // Recalculate Avatar Geometry
+        // Recalculate Avatar Geometry based on Window/Hero
         if (state.hero.isMobile) {
             state.hero.avatarRadius = Math.min(state.hero.width, state.hero.height) * 0.25; 
             state.hero.avatarX = state.hero.width / 2;
@@ -201,28 +212,27 @@ function initHeroCanvas() {
     window.addEventListener('resize', resize);
     resize(); // Initial call
 
-    // Animation Loop
+    // 4. Auto-Start Animation (No Trigger Needed)
+    state.hero.hasTriggered = true; 
+    state.hero.triggerTime = Date.now();
     state.hero.startTime = Date.now();
+    
     animateHero();
 
-    // Event Listeners for Interaction
+    // Event Listeners for Interaction (Only applies AFTER loading)
     heroSection.addEventListener('mousemove', (e) => {
+        if(!state.hero.isComplete) return;
         const rect = heroSection.getBoundingClientRect();
         state.hero.mouse.x = e.clientX - rect.left;
         state.hero.mouse.y = e.clientY - rect.top;
-        
-        document.getElementById('coords').innerText = `x:${Math.floor(state.hero.mouse.x)} y:${Math.floor(state.hero.mouse.y)}`;
-        triggerHeroGeneration();
     });
-
-    window.addEventListener('scroll', triggerHeroGeneration);
 }
 
 function createParticles() {
     state.hero.particles = [];
     const { width, height, avatarX, avatarY, avatarRadius, img, isMobile } = state.hero;
     
-    // Create temporary canvas for image data extraction
+    // Use noise canvas dimensions for extraction
     const tempCanvas = document.createElement('canvas');
     const tempCtx = tempCanvas.getContext('2d');
     tempCanvas.width = width;
@@ -234,7 +244,6 @@ function createParticles() {
     tempCtx.closePath();
     tempCtx.clip();
 
-    // Draw Image (Cover Fit Logic)
     const aspect = img.width / img.height;
     let drawW, drawH, drawX, drawY;
     const boxSize = avatarRadius * 2;
@@ -253,7 +262,6 @@ function createParticles() {
     tempCtx.drawImage(img, drawX, drawY, drawW, drawH);
     tempCtx.restore();
 
-    // Pixel Scanning
     const imgData = tempCtx.getImageData(0, 0, width, height).data;
     const density = isMobile ? 3 : 2; 
     
@@ -284,7 +292,7 @@ function createParticles() {
         }
     }
 
-    // Add Background Noise
+    // Add Background Noise (Particles)
     const particleCount = isMobile ? 600 : 1500;
     for (let i = 0; i < particleCount; i++) {
         state.hero.particles.push({
@@ -294,7 +302,7 @@ function createParticles() {
             targetY: Math.random() * height,
             vx: (Math.random() - 0.5) * 0.5,
             vy: (Math.random() - 0.5) * 0.5,
-            color: Math.random() > 0.5 ? '#fbbf24' : '#ffffff', // Using accent color
+            color: Math.random() > 0.5 ? '#fbbf24' : '#ffffff',
             size: Math.random() * 1.5 + 0.5,
             isNoise: true
         });
@@ -302,7 +310,6 @@ function createParticles() {
 }
 
 function createFallbackParticles() {
-    // Basic fallback if image fails
     const { width, height, avatarX, avatarY, avatarRadius } = state.hero;
     for(let i=0; i<3000; i++) {
         const angle = Math.random() * Math.PI * 2;
@@ -320,37 +327,12 @@ function createFallbackParticles() {
     }
 }
 
-function triggerHeroGeneration() {
-    if (state.hero.hasTriggered || !state.hero.img.complete) return;
-    state.hero.hasTriggered = true;
-    state.hero.triggerTime = Date.now();
-}
-
-function resetHeroAnimation() {
-    // Call this when scrolling UP away from section to reset state
-    state.hero.hasTriggered = false;
-    state.hero.isGenerating = true;
-    state.hero.isComplete = false;
-    state.hero.generationProgress = 0;
-    
-    // Reset UI
-    document.getElementById('prompt').classList.remove('hidden');
-    document.getElementById('stats').classList.remove('visible');
-    document.getElementById('content').classList.remove('visible');
-    document.getElementById('readout').classList.remove('visible');
-    document.getElementById('progress').style.width = '0%';
-    
-    // Clear canvas
-    const { width, height } = state.hero;
-    state.hero.contentCtx.clearRect(0,0, width, height);
-}
-
 function animateHero() {
-    requestAnimationFrame(animateHero);
+    state.hero.rafId = requestAnimationFrame(animateHero);
     
     const { isGenerating, isComplete, hasTriggered, triggerTime, width, height, avatarX, avatarY, avatarRadius, noiseCtx, contentCtx, particles, mouse } = state.hero;
 
-    // 1. Diffusion Phase
+    // 1. Loading / Diffusion Phase (Happens in #loading-screen)
     if (isGenerating && hasTriggered) {
         const now = Date.now();
         const elapsed = now - triggerTime;
@@ -362,31 +344,46 @@ function animateHero() {
         
         state.hero.generationProgress = progress;
 
-        // UI Updates
-        document.getElementById('progress').style.width = `${progress * 100}%`;
-        document.getElementById('step-count').innerText = Math.floor(progress * 50);
+        // Loader UI Updates
+        const progressBar = document.getElementById('progress');
+        if(progressBar) progressBar.style.width = `${progress * 100}%`;
+        
+        const stepCount = document.getElementById('step-count');
+        if(stepCount) stepCount.innerText = Math.floor(progress * 50);
 
         if (progress > 0.01) {
             document.getElementById('prompt').classList.add('hidden');
             document.getElementById('stats').classList.add('visible');
         }
 
+        // --- COMPLETION TRIGGER ---
         if (progress >= 1) {
             state.hero.isGenerating = false;
             state.hero.isComplete = true;
-            noiseCtx.clearRect(0, 0, width, height);
-            document.getElementById('stats').classList.remove('visible');
-            document.getElementById('content').classList.add('visible');
-            document.getElementById('readout').classList.add('visible');
+            
+            // TRANSITION: Hide Loader, Show Website
+            document.getElementById('loading-screen').classList.add('fade-out');
+            document.getElementById('main-website').classList.add('visible');
+            
+            // Stop noise canvas clearing/drawing
+            noiseCtx.clearRect(0, 0, width, height); 
+            
+            // Re-run createParticles so they target the Hero section properly (which is now visible)
+            // Small delay to allow CSS transition to start rendering
+            setTimeout(() => {
+                createParticles();
+            }, 100);
+            
             return; // Switch to particle phase next frame
         }
 
-        // Noise Render
+        // Noise Generation (Visuals for Loader)
         let blockSize = 40 * (1 - progress);
         if (blockSize < 2) blockSize = 2;
 
         for (let y = 0; y < height; y += blockSize) {
             for (let x = 0; x < width; x += blockSize) {
+                // Calculate distance from center (simulating the avatar forming)
                 const dx = (x + blockSize/2) - avatarX;
                 const dy = (y + blockSize/2) - avatarY;
                 const dist = Math.sqrt(dx*dx + dy*dy);
@@ -414,10 +411,10 @@ function animateHero() {
         }
     }
 
-    // 2. Particle Phase
+    // 2. Main Site Particle Phase (Happens in #hero-section)
     if (isComplete) {
-        contentCtx.fillStyle = 'rgba(12, 10, 9, 0.15)'; // Match BG color trail
-        contentCtx.fillRect(0, 0, width, height);
+        contentCtx.clearRect(0, 0, width, height);
+        // We don't fillRect background because the CSS background of hero section handles it now
 
         const speed = mouse.x !== null ? Math.hypot(mouse.x - mouse.lastX, mouse.y - mouse.lastY) : 0;
 
@@ -430,7 +427,7 @@ function animateHero() {
             p.vx *= 0.92;
             p.vy *= 0.92;
 
-            // Mouse Interaction
+            // Mouse Interaction (Only when on main site)
             if (mouse.x !== null) {
                 const mdx = mouse.x - p.x;
                 const mdy = mouse.y - p.y;
@@ -462,9 +459,6 @@ function animateHero() {
         contentCtx.globalAlpha = 1;
         state.hero.mouse.lastX = state.hero.mouse.x;
         state.hero.mouse.lastY = state.hero.mouse.y;
-
-        const elapsed = ((Date.now() - state.hero.startTime) / 1000).toFixed(2);
-        document.getElementById('inference').innerText = `${elapsed}s`;
     }
 }
 
@@ -1182,11 +1176,18 @@ function initContactSection() {
     const netContainer = document.getElementById('network-interfaces');
     netContainer.innerHTML = '';
     
-    // Email
+    // -- UPDATED SECTION START --
+    // Email 1: Personal
     createNetItem(netContainer, 'PERSONAL_SMTP_UPLINK', d.email, 'green', () => copyToClip(d.email));
-    // Phone
+    
+    // Email 2: Organization (NEW)
+    // We use 'green' again to show it is also Active/Online
+    if(d.email_org) {
+        createNetItem(netContainer, 'ORGANIZATION_SMTP_UPLINK', d.email_org, 'green', () => copyToClip(d.email_org));
+    }
+    // -- UPDATED SECTION END --
+
     createNetItem(netContainer, 'VOICE_GATEWAY', d.phone, 'yellow', () => copyToClip(d.phone));
-    // Location (No Copy)
     createNetItem(netContainer, 'GEO_LOCATION', d.location, 'blue', null);
 
     // 3. Build Sidebar (Git Remotes)
@@ -1201,10 +1202,14 @@ function initContactSection() {
         gitContainer.appendChild(link);
     });
 
-    // 4. Bind Input Events for Live Code Update
+    // 4. Bind Input Events (Live Preview + Remove Error Glow)
     const inputs = ['in-name', 'in-email', 'in-intent', 'in-message'];
     inputs.forEach(id => {
-        document.getElementById(id).addEventListener('input', updateCodePreview);
+        const el = document.getElementById(id);
+        el.addEventListener('input', () => {
+            updateCodePreview();
+            el.classList.remove('input-error'); // Remove red glow on typing
+        });
     });
     
     // 5. Bind Run Button
@@ -1361,4 +1366,160 @@ function initFooter() {
         btn.innerText = "COPIED";
         setTimeout(() => btn.innerText = "COPY", 2000);
     });
+}
+
+
+/* =========================================
+   NEW LOGIC: VALIDATION & EMAILJS
+   ========================================= */
+
+function validateInputs(name, email, message) {
+    const term = document.getElementById('terminal-output');
+    
+    // Get Elements
+    const nameEl = document.getElementById('in-name');
+    const emailEl = document.getElementById('in-email');
+    const msgEl = document.getElementById('in-message');
+    
+    // Reset previous errors
+    nameEl.classList.remove('input-error');
+    emailEl.classList.remove('input-error');
+    msgEl.classList.remove('input-error');
+
+    let isValid = true;
+    let errorLog = "";
+
+    // 1. Check Name
+    if (!name) {
+        nameEl.classList.add('input-error');
+        errorLog += `<br><span class="loss-val">> ERROR: Name field cannot be NoneType.</span>`;
+        isValid = false;
+    }
+
+    // 2. Check Email
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!email) {
+        emailEl.classList.add('input-error');
+        errorLog += `<br><span class="loss-val">> ERROR: Email address required for handshake.</span>`;
+        isValid = false;
+    } else if (!emailRegex.test(email)) {
+        emailEl.classList.add('input-error');
+        errorLog += `<br><span class="loss-val">> ERROR: ValueError: Invalid email format "${email}".</span>`;
+        isValid = false;
+    }
+
+    // 3. Check Message
+    if (!message) {
+        msgEl.classList.add('input-error');
+        errorLog += `<br><span class="loss-val">> ERROR: Empty payload. Message body missing.</span>`;
+        isValid = false;
+    }
+
+    if (!isValid) {
+        term.innerHTML += errorLog;
+        term.scrollTop = term.scrollHeight;
+    }
+
+    return isValid;
+}
+
+function runContactScript() {
+    if (state.contact.isRunning) return;
+    
+    // 1. Get Values
+    const name = document.getElementById('in-name').value.trim();
+    const email = document.getElementById('in-email').value.trim();
+    const intent = document.getElementById('in-intent').value;
+    const message = document.getElementById('in-message').value.trim();
+    const btn = document.getElementById('run-script-btn');
+    const term = document.getElementById('terminal-output');
+
+    // 2. Validate (Stop if invalid)
+    // Clear terminal line for a fresh run attempt
+    term.innerHTML = '<span class="path">user@naveen-portfolio:~/scripts$</span>';
+    
+    if (!validateInputs(name, email, message)) {
+        // Validation failed, errors already printed in helper
+        term.innerHTML += `<br><span class="path">user@naveen-portfolio:~/scripts$</span> <span class="cursor-blink">_</span>`;
+        return; 
+    }
+
+    // 3. Start Execution
+    state.contact.isRunning = true;
+    
+    // UI Feedback
+    btn.style.background = '#fbbf24'; 
+    btn.innerHTML = '⚡ RUNNING...';
+    
+    const lines = [
+        `> python3 contact_me.py --intent="${intent}"`,
+        '> Compiling payload...',
+        '> Importing dependencies [agent_factory, sys]... OK',
+        '> Validating sender credentials... OK',
+        '> Establishing secure handshake with Naveen.ai...',
+    ];
+
+    let delay = 0;
+
+    // Play "Fake" logs first to build suspense
+    lines.forEach((line, index) => {
+        delay += Math.random() * 300 + 200;
+        setTimeout(() => {
+            term.innerHTML += `<br><span class="log-msg">${line}</span>`;
+            term.scrollTop = term.scrollHeight;
+        }, delay);
+    });
+
+    // 4. Actual EmailJS Call (Happens after logs start)
+    setTimeout(() => {
+        term.innerHTML += `<br><span class="log-msg">> Transmitting packets...</span>`;
+        term.scrollTop = term.scrollHeight;
+
+        const serviceID = "service_06l110a";   // REPLACE THIS
+        const templateID = "template_7l5821o"; // REPLACE THIS
+
+        const params = {
+            from_name: name,
+            reply_to: email,
+            intent: intent,
+            message: message
+        };
+
+        emailjs.send(serviceID, templateID, params)
+            .then(() => {
+                // SUCCESS
+                const id = Math.floor(Math.random() * 9000) + 1000;
+                term.innerHTML += `<br><span class="success-msg">✔ SUCCESS: Message delivered to buffer [ID: ${id}].</span>`;
+                term.innerHTML += `<br><span class="path">user@naveen-portfolio:~/scripts$</span> <span class="cursor-blink">_</span>`;
+                term.scrollTop = term.scrollHeight;
+
+                btn.style.background = '#4ade80';
+                btn.innerHTML = '<span class="play-icon">▶</span> SCRIPT EXECUTED';
+
+                // Reset Form
+                setTimeout(() => {
+                    state.contact.isRunning = false;
+                    document.getElementById('ide-form').reset();
+                    updateCodePreview(); // Reset the Python preview too
+                    btn.innerHTML = '<span class="play-icon">▶</span> RUN SCRIPT';
+                }, 4000);
+            })
+            .catch((err) => {
+                // ERROR
+                console.error('EmailJS Error:', err);
+                term.innerHTML += `<br><span class="loss-val">✖ FATAL ERROR: Connection Refused. Server responded: ${JSON.stringify(err)}</span>`;
+                term.innerHTML += `<br><span class="path">user@naveen-portfolio:~/scripts$</span> <span class="cursor-blink">_</span>`;
+                term.scrollTop = term.scrollHeight;
+                
+                btn.style.background = '#ff5f56'; // Red for error
+                btn.innerHTML = '⚠ FAILED';
+                state.contact.isRunning = false;
+                
+                setTimeout(() => {
+                    btn.style.background = '#4ade80';
+                    btn.innerHTML = '<span class="play-icon">▶</span> RUN SCRIPT';
+                }, 4000);
+            });
+
+    }, delay + 500); // Wait for logs to finish before sending
 }
