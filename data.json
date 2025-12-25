@@ -157,13 +157,13 @@
   },
   "contact": {
     "filename": "contact_me.py",
-    "email": "naveen@agents.ai",
-    "email_org": "founder@agentsfactory.io", 
-    "phone": "+91 98765 43210",
-    "location": "Chennai, IN [13.08° N]",
+    "email": "naveenvijaymath@gmail.com",
+    "email_org": "naveen@agentsfactory.io", 
+    "phone": "+91 63790 21566",
+    "location": "Coimbatore, IN [11.0749004° N, 77.1930872° E]",
     "socials": [
-      { "label": "origin/github", "link": "https://github.com/", "icon": "" },
-      { "label": "origin/linkedin", "link": "https://linkedin.com/", "icon": "" }
+      { "label": "origin/github", "link": "https://github.com/Naveen-2402", "icon": "" },
+      { "label": "origin/linkedin", "link": "https://www.linkedin.com/in/naveen-v-7672bb20b/", "icon": "" }
     ],
     "placeholders": {
       "name": "Future_CoFounder",
@@ -173,19 +173,22 @@
   },
   "footer": {
     "title": "REFERENCES & CITATIONS",
-    "abstract": "ABSTRACT: Naveen V is a Multi-Modal Engineer bridging the gap between theoretical AI architectures and scalable production systems. Specializing in Large Language Models, Generative Pipelines, and System Design.",
+    "abstract": "ABSTRACT: Naveen V is a Multi-Modal Engineer bridging the gap between theoretical AI architectures and scalable production systems. Specializing in Large Language Models, Generative Pipelines, and System Design. Targets the right users with user-focused marketing strategy.",
     "references": [
       { "id": "[1]", "label": "Initialization (Home)", "url": "#hero-section" },
-      { "id": "[2]", "label": "Neural_Architecture (Projects)", "url": "#neural-projects" },
+      { "id": "[2]", "label": "Model_Card (About)", "url": "#model-card-section" },
       { "id": "[3]", "label": "Training_Logs (Experience)", "url": "#training-dashboard" },
-      { "id": "[4]", "label": "Model_Card (About)", "url": "#model-card-section" }
+      { "id": "[4]", "label": "Neural_Architecture (Projects)", "url": "#neural-projects" }
+
+
     ],
     "connect": [
-      { "id": "[5]", "label": "GitHub Repositories", "url": "https://github.com/" },
-      { "id": "[6]", "label": "LinkedIn Profile", "url": "https://linkedin.com/" },
-      { "id": "[7]", "label": "Email Correspondence", "url": "mailto:naveen@agents.ai" }
+      { "id": "[5]", "label": "GitHub Repositories", "url": "https://github.com/Naveen-2402" },
+      { "id": "[6]", "label": "LinkedIn Profile", "url": "https://www.linkedin.com/in/naveen-v-7672bb20b/" },
+      { "id": "[7]", "label": "Email Correspondence", "url": "mailto:naveenvijaymath@gmail.com" }
+
     ],
-    "bibtex": "@misc{naveen2025portfolio,\n  author = {Naveen V},\n  title = {Architecting Intelligence: A Portfolio},\n  year = {2025},\n  publisher = {Agents Factory},\n  note = {Accessed via Web}\n}",
-    "meta": "Last updated: 2025-10-24 | v1.0.4-stable"
+    "bibtex": "@misc{naveen2025portfolio,\n  author = {Naveen V},\n  title = {Architecting Intelligence: A Portfolio},\n  year = {2026},\n  publisher = {Agents Factory},\n  howpublished = {\\url{https://agentsfactory.io}},\n  note = {Accessed via Web}\n}",
+    "meta": "Last updated: 25-12-2025 | v1.12.25-stable"
   }
 }

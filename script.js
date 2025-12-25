@@ -66,6 +66,7 @@ async function loadData() {
         initNeuralSection();
         initContactSection();
         initFooter();
+        initGlobalScroll();
     } catch (error) {
         console.error("Error loading data:", error);
     }
@@ -478,7 +479,7 @@ function createFallbackParticles() {
 
 function animateHero() {
     state.hero.rafId = requestAnimationFrame(animateHero);
-    
+
     const { isGenerating, isComplete, hasTriggered, triggerTime, width, height, avatarX, avatarY, avatarRadius, noiseCtx, contentCtx, particles, mouse } = state.hero;
 
     // 1. Loading / Diffusion Phase (Happens in #loading-screen)
@@ -490,13 +491,13 @@ function animateHero() {
         if (elapsed <= 2000) progress = (elapsed / 2000) * 0.8;
         else if (elapsed <= 4000) progress = 0.8 + ((elapsed - 2000) / 2000) * 0.2;
         else progress = 1.0;
-        
+
         state.hero.generationProgress = progress;
 
         // Loader UI Updates
         const progressBar = document.getElementById('progress');
         if(progressBar) progressBar.style.width = `${progress * 100}%`;
-        
+
         const stepCount = document.getElementById('step-count');
         if(stepCount) stepCount.innerText = Math.floor(progress * 50);
 
@@ -509,21 +510,20 @@ function animateHero() {
         if (progress >= 1) {
             state.hero.isGenerating = false;
             state.hero.isComplete = true;
-            
+
             // TRANSITION: Hide Loader, Show Website
             document.getElementById('loading-screen').classList.add('fade-out');
             document.getElementById('main-website').classList.add('visible');
-            
+
             // Stop noise canvas clearing/drawing
-            noiseCtx.clearRect(0, 0, width, height); 
-            
+            noiseCtx.clearRect(0, 0, width, height);
+
             // Re-run createParticles so they target the Hero section properly (which is now visible)
-            // Small delay to allow CSS transition to start rendering
             setTimeout(() => {
                 createParticles();
             }, 100);
-            
-            return; // Switch to particle phase next frame
+
+            return; 
         }
 
         // Noise Generation (Visuals for Loader)
@@ -532,14 +532,13 @@ function animateHero() {
 
         for (let y = 0; y < height; y += blockSize) {
             for (let x = 0; x < width; x += blockSize) {
-                // Calculate distance from center (simulating the avatar forming)
                 const dx = (x + blockSize/2) - avatarX;
                 const dy = (y + blockSize/2) - avatarY;
                 const dist = Math.sqrt(dx*dx + dy*dy);
-                
+
                 const inCircle = dist < avatarRadius + 10;
                 const randomBackground = Math.random() > (0.9 + (progress * 0.1));
-                
+
                 if (inCircle || randomBackground) {
                     const noiseVal = (1 - progress) * 100;
                     let r = 20, g = 20, b = 30;
@@ -548,7 +547,7 @@ function animateHero() {
                         g += (Math.random()) * noiseVal * 2;
                         b += (Math.random()) * noiseVal * 2;
                     } else {
-                        r = 0; g = 10; b = 20; 
+                        r = 0; g = 10; b = 20;
                         r += (Math.random()) * noiseVal * 0.5;
                         g += (Math.random()) * noiseVal * 0.5;
                         b += (Math.random()) * noiseVal * 0.5;
@@ -562,8 +561,11 @@ function animateHero() {
 
     // 2. Main Site Particle Phase (Happens in #hero-section)
     if (isComplete) {
-        contentCtx.clearRect(0, 0, width, height);
-        // We don't fillRect background because the CSS background of hero section handles it now
+        // --- FIX: Use Actual Content Canvas Dimensions for Clearing ---
+        // This prevents "smearing" streaks at the bottom on mobile
+        const actualW = document.getElementById('content-canvas').width;
+        const actualH = document.getElementById('content-canvas').height;
+        contentCtx.clearRect(0, 0, actualW, actualH);
 
         const speed = mouse.x !== null ? Math.hypot(mouse.x - mouse.lastX, mouse.y - mouse.lastY) : 0;
 
@@ -576,7 +578,6 @@ function animateHero() {
             p.vx *= 0.92;
             p.vy *= 0.92;
 
-            // Mouse Interaction (Only when on main site)
             if (mouse.x !== null) {
                 const mdx = mouse.x - p.x;
                 const mdy = mouse.y - p.y;
@@ -604,7 +605,7 @@ function animateHero() {
             contentCtx.arc(p.x, p.y, p.size, 0, Math.PI * 2);
             contentCtx.fill();
         });
-        
+
         contentCtx.globalAlpha = 1;
         state.hero.mouse.lastX = state.hero.mouse.x;
         state.hero.mouse.lastY = state.hero.mouse.y;
@@ -1671,4 +1672,41 @@ function runContactScript() {
             });
 
     }, delay + 500); // Wait for logs to finish before sending
+}
+
+
+/* --- GLOBAL SMOOTH SCROLL (Prevents URL Hash Change) --- */
+function initGlobalScroll() {
+    document.addEventListener('click', (e) => {
+        // 1. Find the closest anchor tag (allows clicking icons inside links)
+        const link = e.target.closest('a');
+        if (!link) return;
+
+        const href = link.getAttribute('href');
+
+        // 2. Check if it is an internal link (starts with #)
+        if (href && href.startsWith('#') && href.length > 1) {
+            e.preventDefault(); // <--- THIS STOPS THE URL CHANGE
+
+            const targetId = href.substring(1);
+            const targetEl = document.getElementById(targetId);
+
+            if (targetEl) {
+                // 3. Scroll to target
+                targetEl.scrollIntoView({ behavior: 'smooth' });
+
+                // 4. (Optional) Close Mobile Menu if it's open
+                // This ensures clicking a footer link or nav link on mobile closes the menu
+                const mobileMenu = document.querySelector('.mobile-menu-overlay');
+                /* If you kept the hamburger code, this helps close it automatically */
+                if (mobileMenu && mobileMenu.classList.contains('active')) {
+                   // trigger the hamburger click to close it cleanly if needed, 
+                   // or just remove the class directly:
+                   mobileMenu.classList.remove('active');
+                   const hamBtn = document.querySelector('.hamburger-btn');
+                   if(hamBtn) hamBtn.classList.remove('open');
+                }
+            }
+        }
+    });
 }

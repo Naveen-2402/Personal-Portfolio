@@ -71,7 +71,8 @@ body {
 /* --- SECTION 1: HERO CONTAINER --- */
 #hero-section {
     position: relative;
-    height: 100vh;
+    min-height: 100vh; /* CHANGED: Allows section to grow if content is taller */
+    height: auto;      /* CHANGED: Removes fixed lock */
     width: 100%;
     overflow: hidden;
     cursor: crosshair;
@@ -357,38 +358,60 @@ h1 {
 @keyframes blinker { 50% { opacity: 0; } }
 
 /* Mobile Responsive */
+/* Mobile Responsive */
 @media (max-width: 968px) {
-    #hero-section { cursor: default; }
-    
-    .content-container { 
-        flex-direction: column-reverse;
+    /* 1. Unlock Hero Height & reset cursor */
+    #hero-section { 
+        cursor: default;
+        height: auto !important; 
+        min-height: 100vh;
+        overflow: visible;
+    }
+
+    /* 2. Stop Floating the Content Layer */
+    .ui-layer {
+        position: relative !important; 
+        height: auto !important;
+        width: 100%;
+        padding-top: 80px;  
+    }
+
+    /* 3. Stack Content Vertically */
+    .content-container {
+        position: relative;
+        height: auto;
+        flex-direction: column-reverse; /* Text bottom, Image top */
         justify-content: flex-end;
     }
-    
-    .text-section { 
-        flex: none; 
+
+    /* 4. Text Spacing - Increased bottom padding to prevent cramping */
+    .text-section {
+        flex: none;
         width: 100%;
-        padding: clamp(20px, 5vw, 40px);
-        padding-bottom: 80px;
+        padding: 40px 20px 100px 20px; /* Increased bottom padding */
     }
-    
-    .image-section { 
-        flex: 1; 
+
+    /* 5. Image Sizing */
+    .image-section {
+        flex: none;
         width: 100%;
-        min-height: 400px; 
+        height: 40vh; 
+        min-height: 350px;
+        position: relative;
     }
 
     h1 { margin-bottom: 15px; }
     .subtitle { margin-bottom: 25px; }
-    
+
+    /* 6. FORCE HIDE Overlapping Elements */
+    /* Using !important to ensure no JS overrides this */
+    .scroll-indicator,
+    .data-readout,
     .stats-ui {
-        bottom: 10px;
-        left: 10px;
-    }
-    
-    .data-readout {
-        bottom: 10px;
-        right: 10px;
+        display: none !important;
+        opacity: 0 !important;
+        visibility: hidden !important;
+        pointer-events: none !important;
     }
 }
 
