@@ -17,6 +17,16 @@ const state = {
         rafId: null,
         generationProgress: 0
     },
+    nav: {
+        lastScrollY: 0,
+        links: [
+            { id: 'hero-section', label: 'ROOT' },
+            { id: 'model-card-section', label: 'SPECS' },
+            { id: 'training-dashboard', label: 'LOGS' },
+            { id: 'neural-projects', label: 'NODES' },
+            { id: 'terminal-contact', label: 'SSH' }
+        ]
+    },
     modelCard: {
         isStreaming: false,
         charIndex: 0,
@@ -49,6 +59,7 @@ async function loadData() {
     try {
         const response = await fetch('data.json');
         state.data = await response.json();
+        initNavbar();
         initHeroText();
         initModelCard();
         initTrainingSection();
@@ -65,11 +76,30 @@ const observerOptions = {
     threshold: 0.1 // Trigger when 10% of section is visible
 };
 
+// Global Intersection Observer for Re-triggering Animations
 const sectionObserver = new IntersectionObserver((entries) => {
     entries.forEach(entry => {
         // 1. General CSS Transition Trigger
         if (entry.isIntersecting) {
             entry.target.classList.add('in-view');
+
+            // --- NEW: NAV HIGHLIGHT LOGIC ---
+            // A. Clear current active state
+            document.querySelectorAll('.nav-link').forEach(el => el.classList.remove('active'));
+            
+            // B. Determine which ID maps to the link
+            let targetId = entry.target.id;
+            
+            // Special case: The Hero section observes an inner wrapper (id="content"), 
+            // but the link points to "hero-section".
+            if(entry.target.closest('#hero-section')) {
+                targetId = 'hero-section';
+            }
+
+            // C. Highlight the matching link
+            const activeLink = document.querySelector(`.nav-link[data-target="${targetId}"]`);
+            if(activeLink) activeLink.classList.add('active');
+
         } else {
             entry.target.classList.remove('in-view');
         }
@@ -91,6 +121,7 @@ const sectionObserver = new IntersectionObserver((entries) => {
                 resetModelCardAnimation();
             }
         }
+
         // TRAINING SECTION
         if(entry.target.id === 'training-dashboard') {
             if(entry.isIntersecting) {
@@ -100,6 +131,8 @@ const sectionObserver = new IntersectionObserver((entries) => {
                 resetTrainingAnimation();
             }
         }
+
+        // NEURAL PROJECTS SECTION
         if(entry.target.id === 'neural-projects') {
             if(entry.isIntersecting) {
                 startNeuralAnimation();
@@ -109,6 +142,7 @@ const sectionObserver = new IntersectionObserver((entries) => {
                 resetNeuralAnimation();
             }
         }
+
         // CONTACT SECTION
         if(entry.target.id === 'terminal-contact') {
             if(entry.isIntersecting) {
@@ -132,6 +166,58 @@ document.addEventListener('DOMContentLoaded', () => {
     sectionObserver.observe(document.getElementById('neural-projects'));
     sectionObserver.observe(document.getElementById('terminal-contact'));
 });
+
+function initNavbar() {
+    const d = state.data.about.profile;
+    
+    // 1. Typewriter for Logo (Left Side)
+    const logoEl = document.getElementById('nav-logo');
+    let nameIdx = 0;
+    const nameTxt = d.name || "NAVEEN V";
+    
+    function typeLogo() {
+        if(nameIdx < nameTxt.length) {
+            logoEl.innerHTML += nameTxt.charAt(nameIdx);
+            nameIdx++;
+            setTimeout(typeLogo, 150); // Typing speed
+        }
+    }
+    // Start typing after site loads
+    setTimeout(typeLogo, 2000);
+
+    // 2. Generate Links (Right Side)
+    const navList = document.getElementById('nav-links');
+    state.nav.links.forEach(link => {
+        const li = document.createElement('li');
+        li.className = 'nav-item';
+        // Prevent default anchor jump, use smooth scroll
+        li.innerHTML = `<a href="#${link.id}" class="nav-link" data-target="${link.id}">${link.label}</a>`;
+        navList.appendChild(li);
+    });
+
+    // 3. Smooth Scroll Click Handler
+    navList.addEventListener('click', (e) => {
+        if(e.target.classList.contains('nav-link')) {
+            e.preventDefault();
+            const targetId = e.target.getAttribute('data-target');
+            document.getElementById(targetId).scrollIntoView({ behavior: 'smooth' });
+        }
+    });
+
+    // 4. Scroll Hiding & Interaction Logic
+    window.addEventListener('scroll', () => {
+        const nav = document.getElementById('main-nav');
+        const currentScrollY = window.scrollY;
+
+        // Hide on down, Show on up
+        if (currentScrollY > state.nav.lastScrollY && currentScrollY > 100) {
+            nav.classList.add('nav-hidden');
+        } else {
+            nav.classList.remove('nav-hidden');
+        }
+        state.nav.lastScrollY = currentScrollY;
+    });
+}
 
 /* =========================================
    SECTION 1: HERO LOGIC (MODIFIED FOR SEPARATE LOADER)

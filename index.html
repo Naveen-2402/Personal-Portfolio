@@ -12,33 +12,43 @@
     <section id="loading-screen">
         <canvas id="noise-canvas"></canvas>
         
-        <div class="loader-ui">
-            <div class="generation-prompt" id="prompt">
-                <div class="prompt-text">
-                    > INITIALIZING_SYSTEM_CORE<span class="blink">_</span>
+            <div class="loader-ui">
+                <div class="generation-prompt" id="prompt">
+                    <div class="prompt-text">
+                        > INITIALIZING_SYSTEM_CORE<span class="blink">_</span>
+                    </div>
                 </div>
-            </div>
 
-            <div class="stats-ui" id="stats">
-                <div class="stat-row">
-                    <span>SAMPLER: <span style="color:var(--accent)" id="stat-sampler"></span></span>
-                    <span>STEPS: <span id="step-count">0</span>/<span id="stat-steps">50</span></span>
-                    <span>ROI: <span id="stat-roi"></span></span>
+                <div class="stats-ui" id="stats">
+                    <div class="stat-row">
+                        <span>SAMPLER: <span style="color:var(--accent)" id="stat-sampler"></span></span>
+                        <span>STEPS: <span id="step-count">0</span>/<span id="stat-steps">50</span></span>
+                        <span>ROI: <span id="stat-roi"></span></span>
+                    </div>
+                    <div>> diffusing noise into product<span class="blink">_</span></div>
+                    <div class="progress-container">
+                        <div class="progress-bar" id="progress"></div>
+                    </div>
                 </div>
-                <div>> diffusing noise into product<span class="blink">_</span></div>
-                <div class="progress-container">
-                    <div class="progress-bar" id="progress"></div>
+                
+                <div class="data-readout visible" id="loader-readout" style="opacity: 1;">
+                    <span>LATENT_COORDS: <span id="coords">CALCULATING...</span></span>
                 </div>
             </div>
-            
-            <div class="data-readout visible" id="loader-readout" style="opacity: 1;">
-                 <span>LATENT_COORDS: <span id="coords">CALCULATING...</span></span>
-            </div>
-        </div>
-    </section>
+        </section>
 
-    <div id="main-website">
-        
+        <div id="main-website">
+
+            <nav id="main-nav" class="navbar">
+            <div class="nav-left">
+                <span class="nav-cursor">></span>
+                <span id="nav-logo" class="nav-logo-text"></span><span class="blink">_</span>
+            </div>
+            <div class="nav-right">
+                <ul id="nav-links" class="nav-menu"></ul>
+            </div>
+        </nav>
+
         <section id="hero-section">
             <canvas id="content-canvas"></canvas>
 
@@ -62,6 +72,15 @@
                 <div class="data-readout visible" id="readout">
                     <span>SYSTEM: <span id="entropy">ONLINE</span></span>
                     <span>INFERENCE: <span id="inference">0.00s</span></span>
+                </div>
+
+                <div class="scroll-indicator" id="scroll-hint">
+                    <span class="scroll-text">SCROLL_TO_INIT</span>
+                    <div class="scroll-arrow">
+                        <span></span>
+                        <span></span>
+                        <span></span>
+                    </div>
                 </div>
             </div>
         </section>
