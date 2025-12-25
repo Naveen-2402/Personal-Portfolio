@@ -170,32 +170,90 @@ document.addEventListener('DOMContentLoaded', () => {
 function initNavbar() {
     const d = state.data.about.profile;
     
-    // 1. Typewriter for Logo (Left Side)
+    // 1. TERMINAL LOOPING LOGIC (Left Side)
     const logoEl = document.getElementById('nav-logo');
-    let nameIdx = 0;
-    const nameTxt = d.name || "NAVEEN V";
+    const navCursor = document.querySelector('.nav-cursor');
     
-    function typeLogo() {
-        if(nameIdx < nameTxt.length) {
-            logoEl.innerHTML += nameTxt.charAt(nameIdx);
-            nameIdx++;
-            setTimeout(typeLogo, 150); // Typing speed
-        }
+    // Hide default cursor
+    if(navCursor) navCursor.style.display = 'none';
+
+    // --- CONFIGURATION ---
+    const isMobile = window.innerWidth < 768;
+    const promptUser = isMobile ? "" : "root";
+    const promptHost = isMobile ? "" : "naveen";
+    const promptSym = isMobile ? "~# " : ":~# ";
+    
+    // --- YOUR SELECTED MESSAGES ---
+    const commands = [
+        "./start_engine --mode=founder",
+        "./loading_weights [██████] 100%",
+        "./deploy_agents --scale=global"
+    ];
+    
+    // Build the Static Prompt HTML (Colors)
+    let promptHTML = "";
+    if (!isMobile) {
+        promptHTML += `<span style="color:var(--accent)">${promptUser}</span>`; // root
+        promptHTML += `<span style="color:#fff">@</span>`;
+        promptHTML += `<span style="color:#4ade80">${promptHost}</span>`; // naveen
+        promptHTML += `<span style="color:#fff">${promptSym}</span>`; // :~#
+    } else {
+        promptHTML += `<span style="color:#fff">${promptSym}</span>`; // ~#
     }
-    // Start typing after site loads
-    setTimeout(typeLogo, 2000);
+
+    // State Variables for Looping
+    let msgIndex = 0;       
+    let charIndex = 0;      
+    let isDeleting = false; 
+
+    function typeLoop() {
+        const currentCommand = commands[msgIndex];
+        const visibleText = currentCommand.substring(0, charIndex);
+        
+        // Render: Static Prompt + Dynamic Command
+        logoEl.innerHTML = `${promptHTML}<span style="color:#e5e5e5">${visibleText}</span>`;
+
+        // Determine Speed
+        let typeSpeed = 80; // Standard typing speed
+
+        if (isDeleting) {
+            typeSpeed = 40; // Deleting is faster
+            charIndex--;
+        } else {
+            charIndex++;
+        }
+
+        // Logic Cycles
+        if (!isDeleting && charIndex === currentCommand.length + 1) {
+            // Finished Typing -> Pause -> Start Deleting
+            isDeleting = true;
+            typeSpeed = 2500; // Longer pause to read the message (2.5s)
+        } else if (isDeleting && charIndex === 0) {
+            // Finished Deleting -> Switch Message -> Pause -> Start Typing
+            isDeleting = false;
+            msgIndex = (msgIndex + 1) % commands.length; // Loop 0 -> 1 -> 2 -> 0
+            typeSpeed = 500; // Pause before new message
+        }
+
+        setTimeout(typeLoop, typeSpeed);
+    }
+
+    // Start the loop after a small delay
+    setTimeout(typeLoop, 1000);
 
     // 2. Generate Links (Right Side)
     const navList = document.getElementById('nav-links');
+    navList.innerHTML = ''; 
+
     state.nav.links.forEach(link => {
         const li = document.createElement('li');
         li.className = 'nav-item';
-        // Prevent default anchor jump, use smooth scroll
-        li.innerHTML = `<a href="#${link.id}" class="nav-link" data-target="${link.id}">${link.label}</a>`;
+        // Prefix with ./ to look like executables
+        li.innerHTML = `<a href="#${link.id}" class="nav-link" data-target="${link.id}">./${link.label}</a>`;
         navList.appendChild(li);
     });
 
-    // 3. Smooth Scroll Click Handler
+    // 3. Click Handlers
     navList.addEventListener('click', (e) => {
         if(e.target.classList.contains('nav-link')) {
             e.preventDefault();
@@ -204,12 +262,12 @@ function initNavbar() {
         }
     });
 
-    // 4. Scroll Hiding & Interaction Logic
+    // 4. Scroll Logic
     window.addEventListener('scroll', () => {
         const nav = document.getElementById('main-nav');
         const currentScrollY = window.scrollY;
-
-        // Hide on down, Show on up
+        
+        // Hide on scroll down, Show on scroll up
         if (currentScrollY > state.nav.lastScrollY && currentScrollY > 100) {
             nav.classList.add('nav-hidden');
         } else {
