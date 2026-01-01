@@ -2,3 +2,11 @@ npm init -y
 npm install vite @emailjs/browser
 
 npx vite
+
+
+------------------------------------
+
+npm install
+npm run build
+npm install
+npm run build

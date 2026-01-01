@@ -1,16 +1,17 @@
 {
   "name": "personal-portfolio",
+  "private": true,
   "version": "1.0.0",
-  "main": "script.js",
+  "type": "module",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview"
   },
-  "keywords": [],
-  "author": "",
-  "license": "ISC",
-  "description": "",
   "dependencies": {
-    "@emailjs/browser": "^4.4.1",
+    "@emailjs/browser": "^4.4.1"
+  },
+  "devDependencies": {
     "vite": "^6.4.1"
   }
 }
